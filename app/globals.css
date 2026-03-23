@@ -1,8 +1,36 @@
+/* Manual theme override using data-theme attribute */
+html[data-theme="light"] {
+  --background: var(--color-light-gray);
+  --foreground: var(--color-eerie-black);
+  --accent: var(--color-maximum-blue);
+  --muted: var(--color-manatee);
+  --surface: #fff;
+}
+
+html[data-theme="dark"] {
+  --background: var(--color-black-pearl);
+  --foreground: var(--color-light-gray);
+  --accent: var(--color-maximum-blue);
+  --muted: var(--color-manatee);
+  --surface: var(--color-paynes-gray);
+}
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Color Palette */
+  --color-black-pearl: #1c2a33;
+  --color-maximum-blue: #0a6481;
+  --color-manatee: #9193a0;
+  --color-light-gray: #d6d7df;
+  --color-paynes-gray: #3e4758;
+  --color-eerie-black: #17181c;
+
+  /* Light mode defaults */
+  --background: var(--color-light-gray);
+  --foreground: var(--color-eerie-black);
+  --accent: var(--color-maximum-blue);
+  --muted: var(--color-manatee);
+  --surface: #fff;
 }
 
 @theme inline {
@@ -14,8 +42,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-black-pearl);
+    --foreground: var(--color-light-gray);
+    --accent: var(--color-maximum-blue);
+    --muted: var(--color-manatee);
+    --surface: var(--color-paynes-gray);
   }
 }
 
