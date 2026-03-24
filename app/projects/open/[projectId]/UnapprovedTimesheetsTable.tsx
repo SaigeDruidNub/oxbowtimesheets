@@ -76,7 +76,7 @@ export default function UnapprovedTimesheetsTable({
         <table className="w-full text-left text-sm">
           <thead className="bg-black/20 text-gray-400 font-medium uppercase text-xs tracking-wider">
             <tr>
-              <th className="px-6 py-4 w-12">
+              <th className="px-3 py-2 w-12 text-center">
                 <input
                   type="checkbox"
                   checked={
@@ -86,12 +86,12 @@ export default function UnapprovedTimesheetsTable({
                   className="form-checkbox h-4 w-4 text-[var(--accent)] rounded border-[var(--muted)] bg-[var(--background)] focus:ring-offset-[var(--surface)] cursor-pointer"
                 />
               </th>
-              <th className="px-6 py-4">Date</th>
-              <th className="px-6 py-4">Employee</th>
-              <th className="px-6 py-4">Task</th>
-              <th className="px-6 py-4">Component</th>
-              <th className="px-6 py-4">Notes</th>
-              <th className="px-6 py-4 text-right">Hours</th>
+              <th className="px-3 py-2">Date</th>
+              <th className="px-3 py-2">Employee</th>
+              <th className="px-3 py-2">Task</th>
+              <th className="px-3 py-2">Component</th>
+              <th className="px-3 py-2">Notes</th>
+              <th className="px-3 py-2 text-right">Hours</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">

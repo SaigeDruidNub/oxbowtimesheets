@@ -28,6 +28,8 @@ interface ProjectDetails {
   supervisor_first: string;
   supervisor_last: string;
   client_name: string;
+  client_phone: string;
+  client_email: string;
 }
 
 interface TimeSummary {
@@ -59,7 +61,7 @@ async function getProjectDetails(id: string) {
   const result: any = await query({
     query: `
     SELECT 
-      j.id, j.legacy_id, j.job_name, j.status, j.created, j.description, j.client_name,
+      j.id, j.legacy_id, j.job_name, j.status, j.created, j.description, j.client_name, j.client_phone, j.client_email,
       j.manager_id, j.site_supervisor_id,
       m.first_name as manager_first, m.last_name as manager_last,
       s.first_name as supervisor_first, s.last_name as supervisor_last
@@ -264,38 +266,55 @@ export default async function ProjectOverviewPage({
               <h2 className="text-lg font-semibold mb-4 text-gray-200 uppercase tracking-wider text-xs">
                 Project Information
               </h2>
-              <div className="space-y-3 text-sm text-[--foreground]">
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Created</span>{" "}
+              <div className="flex flex-col text-sm text-[--foreground] divide-y divide-gray-800">
+                <div className="grid grid-cols-[100px_1fr] py-2">
+                  <span className="text-gray-400">Created</span>
                   <span>{new Date(project.created).toLocaleDateString()}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Manager</span>{" "}
+                <div className="grid grid-cols-[100px_1fr] py-2">
+                  <span className="text-gray-400">Manager</span>
                   <span>
                     {project.manager_first} {project.manager_last}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Supervisor</span>{" "}
+                <div className="grid grid-cols-[100px_1fr] py-2">
+                  <span className="text-gray-400">Supervisor</span>
                   <span>
                     {project.supervisor_first} {project.supervisor_last}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Client</span>{" "}
+                <div className="grid grid-cols-[100px_1fr] py-2">
+                  <span className="text-gray-400">Client</span>
                   <span>{project.client_name}</span>
                 </div>
-                {project.description && (
-                  <div className="mt-4 pt-2">
-                    <span className="text-gray-400 block mb-2 text-xs uppercase">
-                      Description
-                    </span>
-                    <p className="text-gray-300 bg-black/20 p-3 rounded leading-relaxed border border-gray-800">
-                      {project.description}
-                    </p>
+                {project.client_phone && (
+                  <div className="grid grid-cols-[100px_1fr] py-2">
+                    <span className="text-gray-400">Phone</span>
+                    <span>{project.client_phone}</span>
+                  </div>
+                )}
+                {project.client_email && (
+                  <div className="grid grid-cols-[100px_1fr] py-2">
+                    <span className="text-gray-400">Email</span>
+                    <a
+                      href={`mailto:${project.client_email}`}
+                      className="text-[var(--foreground)] hover:text-[var(--accent)] hover:underline transition-colors truncate"
+                    >
+                      {project.client_email}
+                    </a>
                   </div>
                 )}
               </div>
+              {project.description && (
+                <div className="py-3">
+                  <span className="text-gray-400 block mb-1 text-xs uppercase">
+                    Description
+                  </span>
+                  <p className="text-gray-300 bg-black/20 p-2 rounded leading-relaxed border border-gray-800 text-sm">
+                    {project.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="bg-[--surface] p-6 rounded-lg shadow-sm border border-gray-800">
@@ -327,39 +346,39 @@ export default async function ProjectOverviewPage({
               <h2 className="text-lg font-semibold mb-4 text-gray-200 uppercase tracking-wider text-xs">
                 Time Totals (Hours)
               </h2>
-              <div className="space-y-3 text-sm text-[--foreground]">
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Investment</span>{" "}
+              <div className="flex flex-col text-sm text-[--foreground] divide-y divide-gray-800">
+                <div className="grid grid-cols-[120px_1fr] py-2">
+                  <span className="text-gray-400">Investment</span>
                   <span className="font-mono">
                     {getHours("Investment").toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Billable T&M</span>{" "}
+                <div className="grid grid-cols-[120px_1fr] py-2">
+                  <span className="text-gray-400">Billable T&M</span>
                   <span className="font-mono">
                     {getHours("Billable T&M").toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Billable Fixed</span>{" "}
+                <div className="grid grid-cols-[120px_1fr] py-2">
+                  <span className="text-gray-400">Billable Fixed</span>
                   <span className="font-mono">
                     {getHours("Billable Fixed").toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Overhead</span>{" "}
+                <div className="grid grid-cols-[120px_1fr] py-2">
+                  <span className="text-gray-400">Overhead</span>
                   <span className="font-mono">
                     {getHours("Overhead").toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-gray-800">
-                  <span className="text-gray-400">Unbillable</span>{" "}
+                <div className="grid grid-cols-[120px_1fr] py-2">
+                  <span className="text-gray-400">Unbillable</span>
                   <span className="font-mono">
                     {getHours("Unbillable").toFixed(2)}
                   </span>
                 </div>
-                <div className="mt-4 pt-2 flex justify-between font-bold text-base text-[--foreground]">
-                  <span>Total Hours</span>{" "}
+                <div className="pt-2 mt-2 border-t border-gray-700 grid grid-cols-[120px_1fr] font-bold text-base text-[--foreground]">
+                  <span>Total Hours</span>
                   <span className="font-mono">{totalHours.toFixed(2)}</span>
                 </div>
               </div>
@@ -377,19 +396,22 @@ export default async function ProjectOverviewPage({
             <h2 className="text-lg font-semibold mb-4 text-gray-200 uppercase tracking-wider text-xs">
               Project Log
             </h2>
-            <div className="space-y-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+            <div className="flex flex-col text-sm text-[--foreground] divide-y divide-gray-800 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
               {logs.map((log) => (
                 <div
                   key={log.id}
-                  className="border-b border-gray-800 pb-3 last:border-0 hover:bg-white/5 p-2 rounded transition-colors"
+                  className="py-2 px-1 hover:bg-white/5 transition-colors"
                 >
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>{new Date(log.date).toLocaleDateString()}</span>
+                  <div className="flex gap-3 text-xs text-gray-500 mb-1">
+                    <span className="font-mono text-gray-400">
+                      {new Date(log.date).toLocaleDateString()}
+                    </span>
+                    <span className="text-gray-500">•</span>
                     <span className="text-gray-400">
                       {log.author_first} {log.author_last}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-300 leading-snug">
+                  <p className="text-sm text-gray-300 leading-snug pl-1">
                     {log.text}
                   </p>
                 </div>

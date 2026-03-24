@@ -25,13 +25,13 @@ export default function MainLayout({
 
         {/* Desktop Sidebar */}
         <div className="hidden md:block">
-          <Sidebar />
+          <Sidebar user={user} />
         </div>
 
         {/* Mobile Sidebar (Dropdown) */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-0 left-0 w-full bg-[var(--background)] border-b border-[var(--muted)]/20 shadow-lg z-40 p-4 max-h-[80vh] overflow-y-auto">
-            <Sidebar />
+            <Sidebar user={user} />
           </div>
         )}
       </div>

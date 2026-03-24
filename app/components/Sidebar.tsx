@@ -54,7 +54,7 @@ const documentsSubmenu = [
   { label: "Edit Documents", href: "/documents/edit" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname();
   const [timesheetsExpanded, setTimesheetsExpanded] = useState(false);
   const [projectsExpanded, setProjectsExpanded] = useState(false);
@@ -64,10 +64,15 @@ export default function Sidebar() {
   const [uploadsExpanded, setUploadsExpanded] = useState(false);
   const [documentsExpanded, setDocumentsExpanded] = useState(false);
 
+  // Check access level
+  const isAdmin = user?.accessLevel === "Admin";
+  const isManager = user?.accessLevel === "Manager";
+  const hasProjectAccess = isAdmin || isManager;
+
   useEffect(() => {
     if (pathname === "/" || pathname.startsWith("/timesheets")) {
       setTimesheetsExpanded(true);
-    } else if (pathname.startsWith("/projects")) {
+    } else if (pathname.startsWith("/projects") && hasProjectAccess) {
       setProjectsExpanded(true);
     } else if (pathname.startsWith("/commissions")) {
       setCommissionsExpanded(true);
@@ -80,7 +85,7 @@ export default function Sidebar() {
     } else if (pathname.startsWith("/documents")) {
       setDocumentsExpanded(true);
     }
-  }, [pathname]);
+  }, [pathname, hasProjectAccess]);
 
   return (
     <aside className="w-full md:w-[220px] bg-none py-4 px-2 md:py-8 md:px-2 flex flex-col gap-3 items-center md:items-end">
@@ -135,9 +140,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
@@ -155,65 +158,65 @@ export default function Sidebar() {
             )}
           </li>
 
-          <li style={{ marginBottom: 4 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                color: "var(--foreground)",
-                padding: "6px 0",
-                userSelect: "none",
-              }}
-              onClick={() => setProjectsExpanded((prev) => !prev)}
-            >
-              <span>Projects</span>
-              <span style={{ fontSize: 12, marginLeft: 8 }}>
-                {projectsExpanded ? "▾" : "▸"}
-              </span>
-            </div>
-            {projectsExpanded && (
-              <ul
+          {hasProjectAccess && (
+            <li style={{ marginBottom: 4 }}>
+              <div
                 style={{
-                  listStyle: "none",
-                  padding: "0 0 0 14px",
-                  margin: "2px 0 6px 0",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  color: "var(--foreground)",
+                  padding: "6px 0",
+                  userSelect: "none",
                 }}
+                onClick={() => setProjectsExpanded((prev) => !prev)}
               >
-                {projectsSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
+                <span>Projects</span>
+                <span style={{ fontSize: 12, marginLeft: 8 }}>
+                  {projectsExpanded ? "▾" : "▸"}
+                </span>
+              </div>
+              {projectsExpanded && (
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: "0 0 0 14px",
+                    margin: "2px 0 6px 0",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
+                >
+                  {projectsSubmenu.map(({ label, href }) => {
+                    const isActive = pathname === href;
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          style={{
+                            display: "block",
+                            textDecoration: "none",
+                            fontSize: 14,
+                            fontWeight: isActive ? 700 : 400,
+                            color: isActive ? "#ffffff" : "var(--foreground)",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            background: isActive
+                              ? "var(--accent)"
+                              : "transparent",
+                            transition: "background 0.15s, color 0.15s",
+                          }}
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          )}
 
           <li style={{ marginBottom: 4 }}>
             <div
@@ -255,9 +258,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
@@ -315,9 +316,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
@@ -375,9 +374,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
@@ -435,9 +432,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
@@ -495,9 +490,7 @@ export default function Sidebar() {
                           textDecoration: "none",
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
-                          color: isActive
-                            ? "#ffffff"
-                            : "var(--foreground)",
+                          color: isActive ? "#ffffff" : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive

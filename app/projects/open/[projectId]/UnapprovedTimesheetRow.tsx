@@ -47,9 +47,9 @@ export default function UnapprovedTimesheetRow({
   return (
     <tr
       key={entry.log_id}
-      className={`border-b border-gray-800 last:border-0 transition-colors ${isSelected ? "bg-[var(--accent)]/10" : "hover:bg-[var(--accent)]/5"}`}
+      className={`border-b border-gray-800 last:border-0 transition-colors even:bg-white/5 ${isSelected ? "bg-[var(--accent)]/10" : "hover:bg-[var(--accent)]/10"}`}
     >
-      <td className="px-6 py-4 whitespace-nowrap text-center">
+      <td className="px-3 py-2 whitespace-nowrap text-center">
         <input
           type="checkbox"
           checked={isSelected}
@@ -57,16 +57,16 @@ export default function UnapprovedTimesheetRow({
           className="form-checkbox h-4 w-4 text-[var(--accent)] rounded border-[var(--muted)] bg-[var(--background)] focus:ring-offset-[var(--surface)] cursor-pointer"
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-[var(--foreground)]">
+      <td className="px-3 py-2 whitespace-nowrap text-[var(--foreground)]">
         {new Date(entry.date).toLocaleDateString()}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-[var(--foreground)]">
+      <td className="px-3 py-2 whitespace-nowrap text-[var(--foreground)]">
         {entry.employee_first} {entry.employee_last}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-[var(--foreground)]">
+      <td className="px-3 py-2 whitespace-nowrap text-[var(--foreground)]">
         {entry.task_name}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-2 whitespace-nowrap">
         <select
           value={componentId || ""}
           onChange={(e) => {
@@ -85,12 +85,12 @@ export default function UnapprovedTimesheetRow({
         </select>
       </td>
       <td
-        className="px-6 py-4 text-[var(--muted)] text-xs max-w-xs truncate"
+        className="px-3 py-2 text-[var(--muted)] text-xs max-w-xs truncate"
         title={entry.notes}
       >
         {entry.notes}
       </td>
-      <td className="px-6 py-4 text-right whitespace-nowrap text-[var(--foreground)] font-mono">
+      <td className="px-3 py-2 text-right whitespace-nowrap text-[var(--foreground)] font-mono">
         {entry.hours?.toFixed(2)}
       </td>
     </tr>

@@ -269,42 +269,42 @@ export default function OpenProjectsTable({
             <tr>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium sticky left-0 md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium sticky left-0 md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("legacy_id")}
               >
                 Project #{getSortIndicator("legacy_id")}
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("job_name")}
               >
                 Project{getSortIndicator("job_name")}
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("status")}
               >
                 Status{getSortIndicator("status")}
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("department")}
               >
                 Department{getSortIndicator("department")}
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("billing_type")}
               >
                 Billing Type{getSortIndicator("billing_type")}
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
+                className="px-2 py-2 font-medium cursor-pointer hover:text-[var(--foreground)] transition-colors select-none"
                 onClick={() => requestSort("manager_name")}
               >
                 Manager{getSortIndicator("manager_name")}
@@ -318,20 +318,20 @@ export default function OpenProjectsTable({
                 className="even:bg-[var(--background)]/20 hover:bg-[var(--accent)]/10 transition-colors"
                 style={{ color: "var(--foreground)" }}
               >
-                <td className="px-4 py-3 font-medium sticky left-0 md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none hover:underline cursor-pointer">
+                <td className="px-2 py-2 font-medium sticky left-0 md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none hover:underline cursor-pointer">
                   <Link href={`/projects/open/${project.id}`}>
                     {project.legacy_id}
                   </Link>
                 </td>
-                <td className="px-4 py-3 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none hover:underline cursor-pointer">
+                <td className="px-2 py-2 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none hover:underline cursor-pointer">
                   <Link href={`/projects/open/${project.id}`}>
                     {project.job_name}
                   </Link>
                 </td>
-                <td className="px-4 py-3">{project.status}</td>
-                <td className="px-4 py-3">{project.department}</td>
-                <td className="px-4 py-3">{project.billing_type}</td>
-                <td className="px-4 py-3">{project.manager_name}</td>
+                <td className="px-2 py-2">{project.status}</td>
+                <td className="px-2 py-2">{project.department}</td>
+                <td className="px-2 py-2">{project.billing_type}</td>
+                <td className="px-2 py-2">{project.manager_name}</td>
               </tr>
             ))}
           </tbody>
