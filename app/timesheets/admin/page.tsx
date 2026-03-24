@@ -1,27 +1,20 @@
-export default function AdminTimesheets() {
+import { getTimesheetFormData } from "../actions/get-form-data";
+import { getTimesheets } from "../actions/get-timesheets";
+import TimesheetView from "./TimesheetView";
+
+// Ensure dynamic rendering to fetch fresh data on every request
+export const dynamic = "force-dynamic";
+
+export default async function AdminTimesheetPage() {
+  // Fetch data in parallel
+  const [formData, timesheets] = await Promise.all([
+    getTimesheetFormData(),
+    getTimesheets(),
+  ]);
+
   return (
-    <section
-      style={{
-        background: "var(--surface)",
-        borderRadius: 20,
-        padding: "1.5rem 2rem 2rem 2rem",
-        marginBottom: 32,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: 28,
-          fontWeight: 700,
-          margin: 0,
-          color: "var(--foreground)",
-        }}
-      >
-        Timesheets — Admin
-      </h2>
-      <p style={{ color: "var(--foreground)", marginTop: 16 }}>
-        Admin timesheet view.
-      </p>
-    </section>
+    <div className="bg-[var(--background)] min-h-screen">
+      <TimesheetView initialTimesheets={timesheets} formData={formData} />
+    </div>
   );
 }
