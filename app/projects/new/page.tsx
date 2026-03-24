@@ -1,27 +1,23 @@
-export default function NewProject() {
+import { query } from "@/lib/db";
+import NewProjectForm from "./NewProjectForm";
+
+export const dynamic = "force-dynamic";
+
+export default async function NewProjectPage() {
+  const employees = (await query({
+    query:
+      "SELECT id, first_name, last_name FROM employees WHERE email != 'hidden' ORDER BY first_name ASC",
+    values: [],
+  })) as any[];
+
+  const taskTypes = (await query({
+    query: "SELECT id, name FROM task_types ORDER BY id ASC",
+    values: [],
+  })) as any[];
+
   return (
-    <section
-      style={{
-        background: "var(--surface)",
-        borderRadius: 20,
-        padding: "1.5rem 2rem 2rem 2rem",
-        marginBottom: 32,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: 28,
-          fontWeight: 700,
-          margin: 0,
-          color: "var(--foreground)",
-        }}
-      >
-        Projects — New Project
-      </h2>
-      <p style={{ color: "var(--foreground)", marginTop: 16 }}>
-        Create a new project.
-      </p>
-    </section>
+    <div className="max-w-5xl mx-auto p-8 bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--muted)]/20 min-h-screen">
+      <NewProjectForm employees={employees} taskTypes={taskTypes} />
+    </div>
   );
 }
