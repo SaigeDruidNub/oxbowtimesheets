@@ -83,17 +83,7 @@ export default function Sidebar() {
   }, [pathname]);
 
   return (
-    <aside
-      style={{
-        width: 220,
-        background: "none",
-        padding: "2rem 0.5rem 2rem 0.5rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        alignItems: "flex-end",
-      }}
-    >
+    <aside className="w-full md:w-[220px] bg-none py-4 px-2 md:py-8 md:px-2 flex flex-col gap-3 items-center md:items-end">
       <nav style={{ width: "100%" }}>
         <ul
           style={{
@@ -146,12 +136,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -206,12 +196,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -266,12 +256,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -326,12 +316,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -386,12 +376,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -446,12 +436,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}
@@ -506,12 +496,12 @@ export default function Sidebar() {
                           fontSize: 14,
                           fontWeight: isActive ? 700 : 400,
                           color: isActive
-                            ? "var(--accent)"
+                            ? "#ffffff"
                             : "var(--foreground)",
                           padding: "4px 6px",
                           borderRadius: 6,
                           background: isActive
-                            ? "var(--surface)"
+                            ? "var(--accent)"
                             : "transparent",
                           transition: "background 0.15s, color 0.15s",
                         }}

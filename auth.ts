@@ -20,6 +20,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const employee = result[0];
           (user as any).dbId = employee.id;
           (user as any).accessLevel = employee.access_level;
+          (user as any).first_name = employee.first_name;
+          (user as any).last_name = employee.last_name;
           return true;
         }
 
@@ -36,6 +38,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user) {
         (session.user as any).id = token.id;
         (session.user as any).accessLevel = token.accessLevel;
+        (session.user as any).first_name = token.first_name;
+        (session.user as any).last_name = token.last_name;
       }
       return session;
     },
@@ -43,6 +47,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = (user as any).dbId;
         token.accessLevel = (user as any).accessLevel;
+        token.first_name = (user as any).first_name;
+        token.last_name = (user as any).last_name;
       }
       return token;
     },

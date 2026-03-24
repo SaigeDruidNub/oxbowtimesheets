@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaBars } from "react-icons/fa";
+import { signOut } from "next-auth/react";
 
-export default function Header() {
+export default function Header({
+  user,
+  onMenuToggle,
+}: {
+  user?: any;
+  onMenuToggle?: () => void;
+}) {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
@@ -14,44 +21,28 @@ export default function Header() {
   }, [isDark]);
 
   return (
-    <nav
-      style={{
-        background: "var(--surface)",
-        height: 56,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 2rem",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <FaHome style={{ fontSize: 28, marginRight: 8 }} />
-        <span
-          style={{
-            fontWeight: 700,
-            fontSize: 22,
-            color: "var(--foreground)",
-          }}
+    <nav className="bg-[var(--surface)] h-14 flex items-center justify-between px-4 md:px-8 shadow-sm relative z-50">
+      <div className="flex items-center gap-2">
+        {/* Mobile Menu Toggle - Left Side */}
+        <button
+          className="md:hidden text-[var(--foreground)] p-2 focus:outline-none mr-2"
+          onClick={onMenuToggle}
         >
+          <FaBars className="text-xl" />
+        </button>
+
+        <FaHome className="text-2xl mr-2" />
+        <span className="font-bold text-lg md:text-xl text-[var(--foreground)] truncate max-w-[150px] sm:max-w-none">
           Oxbow Design Build 3.0
         </span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        <span style={{ fontSize: 14, color: "var(--foreground)" }}>
-          Logged in as Charity
+      <div className="flex items-center gap-4 md:gap-6">
+        <span className="text-sm text-[var(--foreground)] hidden md:block">
+          Logged in as {user?.first_name || user?.name || user?.email || "User"}
         </span>
         <button
-          style={{
-            border: "1px solid var(--accent)",
-            background: "var(--accent)",
-            color: "#fff",
-            borderRadius: 8,
-            padding: "6px 18px",
-            fontWeight: 500,
-            marginRight: 12,
-            cursor: "pointer",
-            transition: "background 0.2s, color 0.2s",
-          }}
+          onClick={() => signOut()}
+          className="border border-[var(--accent)] bg-[var(--accent)] text-white rounded-lg px-3 py-1.5 md:px-4 md:py-1.5 text-sm font-medium cursor-pointer hover:brightness-110 transition-all whitespace-nowrap"
         >
           Sign Out
         </button>
@@ -90,7 +81,7 @@ export default function Header() {
               }}
             />
           </div>
-          <span style={{ fontSize: 14, color: "var(--foreground)" }}>
+          <span style={{ fontSize: 14, color: "var(--foreground)" }} className="hidden sm:inline">
             {isDark ? "Dark" : "Light"}
           </span>
         </div>

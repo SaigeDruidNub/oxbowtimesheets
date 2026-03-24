@@ -1,7 +1,10 @@
 import { query } from "@/lib/db";
+import AddUserWrapper from "./AddUserWrapper";
 import Link from "next/link";
-import { FaPencilAlt } from "react-icons/fa";
-// Define the Employee interface based on the database schema
+import EditEmployeeButton from "./EditEmployeeButton";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+
 interface Employee {
   id: number;
   first_name: string;
@@ -20,6 +23,11 @@ interface Employee {
 }
 
 export default async function ActiveEmployeesPage() {
+  const session = await auth();
+  if ((session?.user as any)?.accessLevel !== "Admin") {
+    redirect("/");
+  }
+
   // Fetch employees from the database
   const employees: Employee[] = (await query({
     query:
@@ -46,24 +54,31 @@ export default async function ActiveEmployeesPage() {
     <div className="p-6 bg-[var(--background)] min-h-screen text-[var(--foreground)]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-[var(--foreground)]">
-          All Users
+          Active Employees
         </h1>
-        <button className="bg-[var(--surface)] hover:brightness-110 text-[var(--foreground)] px-4 py-2 rounded border border-[var(--muted)] transition-colors">
-          Add New User
-        </button>
+        <AddUserWrapper />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-[var(--muted)]/20 shadow-xl bg-[var(--surface)]">
-        <table className="w-full text-left text-xs whitespace-nowrap">
-          <thead className="uppercase tracking-wider border-b border-[var(--muted)]/20 bg-[var(--background)]/5 text-[var(--muted)]">
+      <div className="overflow-auto md:overflow-visible rounded-lg border border-[var(--muted)]/20 shadow-xl bg-[var(--surface)] max-h-[calc(100vh-160px)] md:max-h-none">
+        <table className="min-w-full text-left text-xs whitespace-nowrap md:whitespace-normal">
+          <thead className="uppercase tracking-wider border-b border-[var(--muted)]/20 bg-[var(--background)]/5 text-[var(--muted)] sticky top-0 md:static backdrop-blur-sm bg-[var(--surface)] z-10 md:z-auto">
             <tr>
-              <th scope="col" className="px-4 py-3 font-medium">
+              <th
+                scope="col"
+                className="px-4 py-3 font-medium sticky left-0 md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none"
+              >
                 first_name
               </th>
-              <th scope="col" className="px-4 py-3 font-medium">
+              <th
+                scope="col"
+                className="px-4 py-3 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] z-20 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none"
+              >
                 last_name
               </th>
-              <th scope="col" className="px-4 py-3 font-medium">
+              <th
+                scope="col"
+                className="px-4 py-3 font-medium max-w-[100px] md:max-w-none truncate"
+              >
                 email
               </th>
               <th scope="col" className="px-4 py-3 font-medium">
@@ -109,9 +124,15 @@ export default async function ActiveEmployeesPage() {
                 className="even:bg-[var(--background)]/20 hover:bg-[var(--accent)]/10 transition-colors"
                 style={{ color: "var(--foreground)" }}
               >
-                <td className="px-4 py-3 font-medium">{employee.first_name}</td>
-                <td className="px-4 py-3 font-medium">{employee.last_name}</td>
-                <td className="px-4 py-3">{employee.email}</td>
+                <td className="px-4 py-3 font-medium sticky left-0 md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
+                  {employee.first_name}
+                </td>
+                <td className="px-4 py-3 font-medium sticky left-[calc(4rem+20px)] md:static bg-[var(--surface)] md:bg-transparent z-10 md:z-auto shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] md:shadow-none">
+                  {employee.last_name}
+                </td>
+                <td className="px-4 py-3 max-w-[100px] md:max-w-none truncate">
+                  {employee.email}
+                </td>
                 <td className="px-4 py-3">{employee.access_level}</td>
                 <td className="px-4 py-3 text-center">
                   <CheckMark value={employee.worker_owner} />
@@ -142,13 +163,7 @@ export default async function ActiveEmployeesPage() {
                 {/* Placeholder for calculation */}
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
-                    <Link
-                      href={`/employees/edit?id=${employee.id}`}
-                      className="text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-                      title="Edit Employee"
-                    >
-                      <FaPencilAlt size={14} />
-                    </Link>
+                    <EditEmployeeButton employee={employee as any} />
                     <Link
                       href={`/employees/task-editor?id=${employee.id}`}
                       className="text-[var(--foreground)] text-xs font-medium border border-[var(--foreground)]/20 px-2 py-1 rounded hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)] transition-colors"
