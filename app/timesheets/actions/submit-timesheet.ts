@@ -28,6 +28,7 @@ export async function submitTimesheet(formData: FormData) {
   const classification_override =
     formData.get("classification_override") || null;
   const is_hourly = formData.get("is_hourly") === "on" ? 1 : 0;
+  const component_id = formData.get("component_id") || null;
   const log_id = formData.get("log_id");
 
   if (!date || !job_id || !task_type_id) {
@@ -40,7 +41,7 @@ export async function submitTimesheet(formData: FormData) {
       UPDATE timesheets SET
         date = ?, job_id = ?, task_id = ?, task_type_id = ?, 
         hours = ?, ot_hours = ?, mileage = ?, reimbursement = ?, commission_amount = ?,
-        notes = ?, classification_override = ?, is_hourly = ?
+        notes = ?, classification_override = ?, is_hourly = ?, component_id = ?
       WHERE log_id = ? AND employee_id = ?
     `;
     const values = [
@@ -56,6 +57,7 @@ export async function submitTimesheet(formData: FormData) {
       notes,
       classification_override,
       is_hourly,
+      component_id,
       log_id,
       employee_id,
     ];
@@ -63,6 +65,7 @@ export async function submitTimesheet(formData: FormData) {
     try {
       await query({ query: updateQuery, values });
       revalidatePath("/timesheets/admin");
+      revalidatePath("/");
       return { success: true };
     } catch (error) {
       console.error("Error updating timesheet:", error);
@@ -74,8 +77,8 @@ export async function submitTimesheet(formData: FormData) {
     INSERT INTO timesheets (
       employee_id, date, job_id, task_id, task_type_id, 
       hours, ot_hours, mileage, reimbursement, commission_amount,
-      notes, classification_override, is_hourly, resolved, manager_approved
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
+      notes, classification_override, is_hourly, resolved, manager_approved, component_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?)
   `;
 
   const values = [
@@ -92,11 +95,13 @@ export async function submitTimesheet(formData: FormData) {
     notes,
     classification_override,
     is_hourly,
+    component_id,
   ];
 
   try {
     await query({ query: insertQuery, values });
     revalidatePath("/timesheets/admin");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Error submitting timesheet:", error);

@@ -52,6 +52,20 @@ export async function getTimesheetFormData(): Promise<TimesheetFormData> {
     FROM task_types
   `;
 
+  // Fetch components for the jobs we found
+  // We can't easily join in the main jobs query because it's distinct jobs
+  // So we run a separate query. Since jobs list might be long, we might just fetch ALL components
+  // or use WHERE IN (job_ids). But fetching ALL components for active jobs is probably safer/easier if not huge.
+  // Actually, filtering by active jobs is better.
+  const componentsQuery = `
+    SELECT id, job_id, component_name 
+    FROM jobs_components 
+    WHERE job_id IN (
+      SELECT id FROM jobs WHERE status != 'Closed'
+    )
+    ORDER BY component_name ASC
+  `;
+
   try {
     const jobs = (await query({
       query: jobsQuery,
@@ -62,6 +76,7 @@ export async function getTimesheetFormData(): Promise<TimesheetFormData> {
       values: tasksQueryParams,
     })) as any[];
     const taskTypes = (await query({ query: taskTypesQuery })) as any[];
+    const components = (await query({ query: componentsQuery })) as any[];
 
     const tasks = tasksRaw.map((t: any) => ({
       ...t,
@@ -75,6 +90,7 @@ export async function getTimesheetFormData(): Promise<TimesheetFormData> {
       jobs: jobs,
       tasks: tasks as Task[],
       taskTypes: taskTypes,
+      components: components,
       currentUserId: currentUserId,
     };
   } catch (error) {
@@ -83,6 +99,7 @@ export async function getTimesheetFormData(): Promise<TimesheetFormData> {
       jobs: [],
       tasks: [],
       taskTypes: [],
+      components: [],
     };
   }
 }

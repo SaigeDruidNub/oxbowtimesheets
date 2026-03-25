@@ -32,6 +32,7 @@ export async function getTimesheets() {
       t.job_id,
       t.task_id,
       t.task_type_id,
+      t.component_id,
       t.hours, 
       t.ot_hours, 
       t.mileage, 
@@ -42,11 +43,13 @@ export async function getTimesheets() {
       t.classification_override,
       j.job_name, 
       tsk.name as task_name,
-      tt.name as task_type_name
+      tt.name as task_type_name,
+      c.component_name
     FROM timesheets t
     LEFT JOIN jobs j ON t.job_id = j.id
     LEFT JOIN tasks tsk ON t.task_id = tsk.id
     LEFT JOIN task_types tt ON t.task_type_id = tt.id
+    LEFT JOIN jobs_components c ON t.component_id = c.id
     WHERE t.employee_id = ? AND t.date >= ? AND t.date <= ?
     ORDER BY t.date DESC
   `;

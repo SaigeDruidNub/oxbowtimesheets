@@ -29,6 +29,12 @@ export interface TaskType {
   name: string;
 }
 
+export interface Component {
+  id: number;
+  job_id: number;
+  component_name: string;
+}
+
 export interface TimesheetEntry {
   log_id: number;
   date: string;
@@ -42,9 +48,11 @@ export interface TimesheetEntry {
   job_name: string;
   task_name: string;
   task_type_name: string;
+  component_name?: string;
   job_id: number;
   task_id: number;
   task_type_id: number;
+  component_id?: number;
   classification_override?: string;
 }
 
@@ -52,5 +60,6 @@ export interface TimesheetFormData {
   jobs: Job[];
   tasks: Task[];
   taskTypes: TaskType[];
+  components: Component[];
   currentUserId?: number;
 }
