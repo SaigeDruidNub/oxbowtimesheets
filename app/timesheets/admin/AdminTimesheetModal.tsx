@@ -20,6 +20,7 @@ export default function AdminTimesheetModal({
   // Selection State
   const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
+  const [selectedComponentId, setSelectedComponentId] = useState<string>("");
 
   // Form State (Autofilled or User Edited)
   const [taskTypeId, setTaskTypeId] = useState<string>("");
@@ -47,12 +48,14 @@ export default function AdminTimesheetModal({
         // Editing mode: populate fields
         setSelectedJobId(timesheet.job_id?.toString() || "");
         setSelectedTaskId(timesheet.task_id?.toString() || "");
+        setSelectedComponentId(timesheet.component_id?.toString() || "");
         setTaskTypeId(timesheet.task_type_id?.toString() || "");
         setClassOverride(timesheet.classification_override || "");
         setIsHourly(!!timesheet.is_hourly);
       } else {
         // Create mode: reset fields
         setSelectedJobId("");
+        setSelectedComponentId("");
         setSelectedTaskId("");
         setTaskTypeId("");
         setClassOverride("");
@@ -148,6 +151,9 @@ export default function AdminTimesheetModal({
 
   if (!isOpen) return null;
 
+  const filteredComponents = selectedJobId
+    ? formData.components.filter((c) => c.job_id.toString() === selectedJobId)
+    : [];
   const filteredJobs = formData.jobs;
   const filteredTasks = formData.tasks;
 
@@ -216,6 +222,28 @@ export default function AdminTimesheetModal({
               ))}
             </select>
           </div>
+
+          {/* Component Selection */}
+          {filteredComponents.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">
+                Component (Optional)
+              </label>
+              <select
+                name="component_id"
+                className="w-full p-2 border rounded border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                value={selectedComponentId}
+                onChange={(e) => setSelectedComponentId(e.target.value)}
+              >
+                <option value="">Select Component</option>
+                {filteredComponents.map((comp) => (
+                  <option key={comp.id} value={comp.id}>
+                    {comp.component_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Task Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -292,7 +320,7 @@ export default function AdminTimesheetModal({
               </label>
               <input
                 type="number"
-                step="0.01"
+                step="any"
                 name="mileage"
                 defaultValue={timesheet?.mileage?.toString() || ""}
                 className="w-full p-2 border rounded border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
