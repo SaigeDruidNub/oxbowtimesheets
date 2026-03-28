@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ComponentProps,
   type CSSProperties,
@@ -172,6 +173,8 @@ export default function OverviewPivotClient() {
     aggregatorName: "Sum",
     rendererName: "Table",
   });
+  const [copyLabel, setCopyLabel] = useState("Copy to Clipboard");
+  const pivotContainerRef = useRef<HTMLDivElement>(null);
 
   const parsedStartDate = useMemo(() => parseInputDate(startDate), [startDate]);
   const parsedEndDate = useMemo(() => parseInputDate(endDate), [endDate]);
@@ -305,6 +308,35 @@ export default function OverviewPivotClient() {
     return () => abortController.abort();
   }, [startDate, endDate, parsedStartDate, parsedEndDate]);
 
+  function copyTableToClipboard() {
+    const table =
+      pivotContainerRef.current?.querySelector<HTMLTableElement>(
+        "table.pvtTable",
+      );
+    if (!table) return;
+
+    const rows = Array.from(table.querySelectorAll("tr"));
+    const tsv = rows
+      .map((tr) => {
+        const cells = Array.from(
+          tr.querySelectorAll<HTMLTableCellElement>("th, td"),
+        );
+        return cells
+          .flatMap((cell) => {
+            const text = (cell.textContent ?? "").replace(/\t|\n/g, " ").trim();
+            // Expand colSpan so merged header cells line up with data columns
+            return Array<string>(cell.colSpan || 1).fill(text);
+          })
+          .join("\t");
+      })
+      .join("\n");
+
+    navigator.clipboard.writeText(tsv).then(() => {
+      setCopyLabel("Copied!");
+      setTimeout(() => setCopyLabel("Copy to Clipboard"), 2000);
+    });
+  }
+
   function onStartDateChange(value: string) {
     setStartDate(value);
     if (value > endDate) setEndDate(value);
@@ -416,30 +448,55 @@ export default function OverviewPivotClient() {
       ) : null}
 
       {!isLoading && !error && rows.length > 0 ? (
-        <div
-          className="overview-pivot-theme"
-          style={{
-            overflowX: "auto",
-            borderRadius: 12,
-            border: "1px solid rgba(128,128,128,0.25)",
-            background:
-              "color-mix(in srgb, var(--surface) 95%, var(--background))",
-            padding: "0.75rem",
-          }}
-        >
-          <PivotTableUI
-            data={pivotRows as unknown as string[][]}
-            onChange={(state) => setPivotState(state)}
-            renderers={renderers}
-            unusedOrientationCutoff={Infinity}
-            {...pivotState}
-            sorters={{ Day: daySort }}
-          />
-        </div>
+        <>
+          <div
+            ref={pivotContainerRef}
+            className="overview-pivot-theme"
+            style={{
+              overflowX: "auto",
+              borderRadius: 12,
+              border: "1px solid rgba(128,128,128,0.25)",
+              background:
+                "color-mix(in srgb, var(--surface) 95%, var(--background))",
+              padding: "0.75rem",
+            }}
+          >
+            <PivotTableUI
+              data={pivotRows as unknown as string[][]}
+              onChange={(state) => setPivotState(state)}
+              renderers={renderers}
+              unusedOrientationCutoff={Infinity}
+              {...pivotState}
+              sorters={{ Day: daySort }}
+            />
+          </div>
+          <div
+            style={{
+              marginTop: 12,
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <button onClick={copyTableToClipboard} style={copyButtonStyle}>
+              {copyLabel}
+            </button>
+          </div>
+        </>
       ) : null}
     </section>
   );
 }
+
+const copyButtonStyle: CSSProperties = {
+  border: "1px solid var(--accent, #0a6481)",
+  borderRadius: 8,
+  padding: "0.45rem 1.1rem",
+  fontSize: "0.92rem",
+  fontWeight: 600,
+  color: "var(--foreground)",
+  background: "var(--surface)",
+  cursor: "pointer",
+};
 
 const dateInputStyle: CSSProperties = {
   border: "1px solid rgba(120,120,120,0.3)",
