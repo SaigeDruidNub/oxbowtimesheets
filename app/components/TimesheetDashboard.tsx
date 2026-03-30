@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiPlus, FiTrash2, FiEdit2, FiSave, FiX } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiSave, FiX } from "react-icons/fi";
+import { FaEdit } from "react-icons/fa";
 import { TimesheetEntry, TimesheetFormData } from "../timesheets/types";
 import { submitTimesheet } from "../timesheets/actions/submit-timesheet";
 import { deleteTimesheet } from "../timesheets/actions/delete-timesheet";
@@ -877,7 +878,7 @@ export default function TimesheetDashboard({
                       }}
                       title="Edit entry"
                     >
-                      <FiEdit2 size={16} />
+                      <FaEdit size={16} />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(entry.log_id)}

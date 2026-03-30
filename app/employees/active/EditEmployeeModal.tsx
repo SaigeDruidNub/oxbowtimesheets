@@ -138,7 +138,7 @@ export default function EditEmployeeModal({
                 defaultValue={employee.access_level}
                 className="w-full bg-[var(--background)] border border-[var(--muted)]/40 rounded px-3 py-2 focus:outline-none focus:border-[var(--accent)]"
               >
-                <option value="Employee">Employee</option>
+                <option value="Employee">Worker</option>
                 <option value="Manager">Manager</option>
                 <option value="Admin">Admin</option>
               </select>

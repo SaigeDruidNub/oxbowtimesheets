@@ -11,7 +11,7 @@ export default function LoginPage() {
         <form
           action={async () => {
             "use server";
-            await signIn("google", { redirectTo: "/employees/active" });
+            await signIn("google", { redirectTo: "/" });
           }}
         >
           <button

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaPencilAlt } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import EditEmployeeModal, { Employee } from "./EditEmployeeModal";
 
 export default function EditEmployeeButton({
@@ -18,7 +18,7 @@ export default function EditEmployeeButton({
         className="text-[var(--foreground)] hover:text-[var(--accent)] transition-colors cursor-pointer"
         title="Edit Employee"
       >
-        <FaPencilAlt size={14} />
+        <FaEdit size={14} />
       </button>
 
       {isModalOpen && (

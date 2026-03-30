@@ -1,22 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TimesheetFormData, TimesheetEntry } from "../types";
 import AdminTimesheetModal from "./AdminTimesheetModal";
+import { FaEdit } from "react-icons/fa";
 
 interface TimesheetViewProps {
   initialTimesheets: TimesheetEntry[];
   formData: TimesheetFormData;
+  targetEmployee?: { id: number; name: string } | null;
 }
 
 export default function TimesheetView({
   initialTimesheets,
   formData,
+  targetEmployee,
 }: TimesheetViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<TimesheetEntry | null>(
     null,
   );
+
+  // Auto-open modal when navigated here for a specific employee
+  useEffect(() => {
+    if (targetEmployee) {
+      setSelectedEntry(null);
+      setIsModalOpen(true);
+    }
+  }, [targetEmployee]);
 
   const handleEdit = (entry: TimesheetEntry) => {
     setSelectedEntry(entry);
@@ -113,9 +124,10 @@ export default function TimesheetView({
                     <td className="p-4 text-center">
                       <button
                         onClick={() => handleEdit(entry)}
-                        className="text-white border border-white hover:bg-[var(--color-maximum-blue)] hover:border-[var(--color-maximum-blue)] font-medium text-xs uppercase tracking-wide px-3 py-1 rounded transition-colors"
+                        title="Edit"
+                        className="text-gray-400 hover:text-[var(--color-maximum-blue)] transition-colors"
                       >
-                        Edit
+                        <FaEdit className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -141,6 +153,7 @@ export default function TimesheetView({
         onClose={() => setIsModalOpen(false)}
         formData={formData}
         timesheet={selectedEntry || undefined}
+        targetEmployee={!selectedEntry ? targetEmployee : null}
       />
     </div>
   );

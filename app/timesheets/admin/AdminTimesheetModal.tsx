@@ -9,6 +9,7 @@ interface AdminTimesheetModalProps {
   onClose: () => void;
   formData: TimesheetFormData;
   timesheet?: TimesheetEntry | null;
+  targetEmployee?: { id: number; name: string } | null;
 }
 
 export default function AdminTimesheetModal({
@@ -16,6 +17,7 @@ export default function AdminTimesheetModal({
   onClose,
   formData,
   timesheet,
+  targetEmployee,
 }: AdminTimesheetModalProps) {
   // Selection State
   const [selectedJobId, setSelectedJobId] = useState<string>("");
@@ -162,7 +164,11 @@ export default function AdminTimesheetModal({
       <div className="bg-[var(--surface)] p-6 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-[var(--foreground)]">
-            {timesheet ? "Edit Timesheet Entry" : "Add New Timesheet Entry"}
+            {timesheet
+              ? "Edit Timesheet Entry"
+              : targetEmployee
+                ? `Add Entry for ${targetEmployee.name}`
+                : "Add New Timesheet Entry"}
           </h2>
           <button
             onClick={onClose}
@@ -181,6 +187,13 @@ export default function AdminTimesheetModal({
         <form action={formAction} className="space-y-6">
           {timesheet && (
             <input type="hidden" name="log_id" value={timesheet.log_id} />
+          )}
+          {targetEmployee && !timesheet && (
+            <input
+              type="hidden"
+              name="target_employee_id"
+              value={targetEmployee.id}
+            />
           )}
 
           {/* Date Selection */}

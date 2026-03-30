@@ -19,11 +19,11 @@ const projectsSubmenu = [
   { label: "New Project", href: "/projects/new" },
 ];
 
-const commissionsSubmenu = [
+/*const commissionsSubmenu = [
   { label: "History", href: "/commissions/history" },
   { label: "Weekly Generation", href: "/commissions/weekly" },
   { label: "C.I. Ledger", href: "/commissions/ci-ledger" },
-];
+];*/
 
 const reportsSubmenu = [
   { label: "Open Timesheets", href: "/reports/open-timesheets" },
@@ -41,10 +41,10 @@ const employeesSubmenu = [
   { label: "Task Editor", href: "/employees/task-editor" },
 ];
 
-const uploadsSubmenu = [
+/*const uploadsSubmenu = [
   { label: "Upload Timesheets", href: "/uploads/timesheets" },
   { label: "Upload Jobs", href: "/uploads/jobs" },
-];
+];*/
 
 const documentsSubmenu = [
   { label: "Documents Home", href: "/documents/home" },
@@ -55,10 +55,8 @@ export default function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname();
   const [timesheetsExpanded, setTimesheetsExpanded] = useState(false);
   const [projectsExpanded, setProjectsExpanded] = useState(false);
-  const [commissionsExpanded, setCommissionsExpanded] = useState(false);
   const [reportsExpanded, setReportsExpanded] = useState(false);
   const [employeesExpanded, setEmployeesExpanded] = useState(false);
-  const [uploadsExpanded, setUploadsExpanded] = useState(false);
   const [documentsExpanded, setDocumentsExpanded] = useState(false);
 
   // Check access level
@@ -71,14 +69,10 @@ export default function Sidebar({ user }: { user?: any }) {
       setTimesheetsExpanded(true);
     } else if (pathname.startsWith("/projects") && hasProjectAccess) {
       setProjectsExpanded(true);
-    } else if (pathname.startsWith("/commissions")) {
-      setCommissionsExpanded(true);
     } else if (pathname.startsWith("/reports")) {
       setReportsExpanded(true);
     } else if (pathname.startsWith("/employees")) {
       setEmployeesExpanded(true);
-    } else if (pathname.startsWith("/uploads")) {
-      setUploadsExpanded(true);
     } else if (pathname.startsWith("/documents")) {
       setDocumentsExpanded(true);
     }
@@ -226,64 +220,6 @@ export default function Sidebar({ user }: { user?: any }) {
                 padding: "6px 0",
                 userSelect: "none",
               }}
-              onClick={() => setCommissionsExpanded((prev) => !prev)}
-            >
-              <span>Commissions</span>
-              <span style={{ fontSize: 12, marginLeft: 8 }}>
-                {commissionsExpanded ? "▾" : "▸"}
-              </span>
-            </div>
-            {commissionsExpanded && (
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: "0 0 0 14px",
-                  margin: "2px 0 6px 0",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                }}
-              >
-                {commissionsSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
-
-          <li style={{ marginBottom: 4 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                color: "var(--foreground)",
-                padding: "6px 0",
-                userSelect: "none",
-              }}
               onClick={() => setReportsExpanded((prev) => !prev)}
             >
               <span>Reports</span>
@@ -361,64 +297,6 @@ export default function Sidebar({ user }: { user?: any }) {
                 }}
               >
                 {employeesSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
-
-          <li style={{ marginBottom: 4 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                color: "var(--foreground)",
-                padding: "6px 0",
-                userSelect: "none",
-              }}
-              onClick={() => setUploadsExpanded((prev) => !prev)}
-            >
-              <span>Uploads</span>
-              <span style={{ fontSize: 12, marginLeft: 8 }}>
-                {uploadsExpanded ? "▾" : "▸"}
-              </span>
-            </div>
-            {uploadsExpanded && (
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: "0 0 0 14px",
-                  margin: "2px 0 6px 0",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                }}
-              >
-                {uploadsSubmenu.map(({ label, href }) => {
                   const isActive = pathname === href;
                   return (
                     <li key={href}>

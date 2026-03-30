@@ -1,13 +1,14 @@
 import { query } from "@/lib/db";
 import AddUserWrapper from "./AddUserWrapper";
-import Link from "next/link";
 import EditEmployeeButton from "./EditEmployeeButton";
+import AddTimecardButton from "./AddTimecardButton";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import {
   getTenWeekRollingAverage,
   RollingAverageResult,
 } from "@/lib/rolling-average";
+import { getAdminTimesheetFormData } from "@/app/timesheets/actions/get-admin-form-data";
 
 interface Employee {
   id: number;
@@ -42,6 +43,8 @@ export default async function ActiveEmployeesPage() {
       }) as Promise<Employee[]>,
       getTenWeekRollingAverage(),
     ]);
+
+  const formData = await getAdminTimesheetFormData();
 
   const getAverage = (id: number) =>
     averages.find((a) => a.employee_id === id)?.average ?? 0;
@@ -176,12 +179,10 @@ export default async function ActiveEmployeesPage() {
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <EditEmployeeButton employee={employee as any} />
-                    <Link
-                      href={`/employees/task-editor?id=${employee.id}`}
-                      className="text-[var(--foreground)] text-xs font-medium border border-[var(--foreground)]/20 px-2 py-1 rounded hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)] transition-colors"
-                    >
-                      AddTC
-                    </Link>
+                    <AddTimecardButton
+                      employee={employee}
+                      formData={formData}
+                    />
                   </div>
                 </td>
               </tr>

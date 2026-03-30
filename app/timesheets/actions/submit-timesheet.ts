@@ -7,11 +7,19 @@ import { redirect } from "next/navigation";
 
 export async function submitTimesheet(formData: FormData) {
   const session = await auth();
-  const employee_id = (session?.user as any)?.id;
+  const sessionUserId = (session?.user as any)?.id;
+  const accessLevel = (session?.user as any)?.accessLevel;
 
-  if (!employee_id) {
+  if (!sessionUserId) {
     return { error: "Unauthorized: No user session found." };
   }
+
+  // Admins can submit on behalf of another employee
+  const targetEmployeeId = formData.get("target_employee_id");
+  const employee_id =
+    accessLevel === "Admin" && targetEmployeeId
+      ? targetEmployeeId
+      : sessionUserId;
 
   const date = formData.get("date");
   const job_id = formData.get("job_id");
