@@ -27,13 +27,10 @@ const commissionsSubmenu = [
 
 const reportsSubmenu = [
   { label: "Open Timesheets", href: "/reports/open-timesheets" },
-  { label: "Admin", href: "/reports/admin" },
   { label: "PTO Audit", href: "/reports/pto-audit" },
   { label: "Mileage", href: "/reports/mileage" },
-  { label: "Payroll", href: "/reports/payroll" },
   { label: "Payroll (New)", href: "/reports/payroll-new" },
   { label: "Overview", href: "/reports/overview" },
-  { label: "Project Updates", href: "/reports/project-updates" },
   { label: "Timecard Archive", href: "/reports/timecard-archive" },
   { label: "MO Audit (New)", href: "/reports/mo-audit-new" },
 ];

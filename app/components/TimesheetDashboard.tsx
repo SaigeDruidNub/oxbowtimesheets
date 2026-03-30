@@ -6,14 +6,13 @@ import { FiPlus, FiTrash2, FiEdit2, FiSave, FiX } from "react-icons/fi";
 import { TimesheetEntry, TimesheetFormData } from "../timesheets/types";
 import { submitTimesheet } from "../timesheets/actions/submit-timesheet";
 import { deleteTimesheet } from "../timesheets/actions/delete-timesheet";
-
-// TODO: Replace with real PTO and Protected Sick Time values
-const pto = 0;
-const protectedSickTime = 0;
+import { PTOResult } from "@/lib/pto";
 
 interface TimesheetDashboardProps {
   initialTimesheets: TimesheetEntry[];
   formData: TimesheetFormData;
+  ptoData: PTOResult | null;
+  tenWeekAverage: number;
 }
 
 interface NewEntry {
@@ -32,6 +31,8 @@ interface NewEntry {
 export default function TimesheetDashboard({
   initialTimesheets,
   formData,
+  ptoData,
+  tenWeekAverage,
 }: TimesheetDashboardProps) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
@@ -346,10 +347,15 @@ export default function TimesheetDashboard({
               color: "var(--foreground)",
             }}
           >
-            PTO: {pto} | Protected Sick Time: {protectedSickTime}
+            PTO: {ptoData ? ptoData["Paid Time Off Remaining"].toFixed(2) : "—"}{" "}
+            hrs | PST:{" "}
+            {ptoData
+              ? ptoData["Protected Sick Time Remaining"].toFixed(2)
+              : "—"}{" "}
+            hrs
           </span>
           <span className="font-medium text-base ml-2 text-[var(--foreground)]">
-            10wk average: {0}
+            10wk avg: {tenWeekAverage.toFixed(2)} hrs/wk
           </span>
         </div>
 

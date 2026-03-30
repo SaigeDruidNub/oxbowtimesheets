@@ -4,6 +4,10 @@ import Link from "next/link";
 import EditEmployeeButton from "../active/EditEmployeeButton";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import {
+  getTenWeekRollingAverage,
+  RollingAverageResult,
+} from "@/lib/rolling-average";
 
 interface Employee {
   id: number;
@@ -29,11 +33,18 @@ export default async function ArchivedEmployeesPage() {
   }
 
   // Fetch employees from the database
-  const employees: Employee[] = (await query({
-    query:
-      "SELECT * FROM employees WHERE email = 'hidden' ORDER BY first_name ASC",
-    values: [],
-  })) as Employee[];
+  const [employees, averages]: [Employee[], RollingAverageResult[]] =
+    await Promise.all([
+      query({
+        query:
+          "SELECT * FROM employees WHERE email = 'hidden' ORDER BY first_name ASC",
+        values: [],
+      }) as Promise<Employee[]>,
+      getTenWeekRollingAverage(),
+    ]);
+
+  const getAverage = (id: number) =>
+    averages.find((a) => a.employee_id === id)?.average ?? 0;
 
   // Helper to format date
   const formatDate = (date: string | Date | null) => {
@@ -159,8 +170,9 @@ export default async function ArchivedEmployeesPage() {
                 <td className="px-4 py-3 text-center">
                   <CheckMark value={employee.is_salary} />
                 </td>
-                <td className="px-4 py-3 text-[var(--muted)] italic">--</td>
-                {/* Placeholder for calculation */}
+                <td className="px-4 py-3">
+                  {getAverage(employee.id).toFixed(2)}
+                </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <EditEmployeeButton employee={employee as any} />

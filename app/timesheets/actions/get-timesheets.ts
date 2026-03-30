@@ -51,6 +51,8 @@ export async function getTimesheets() {
     LEFT JOIN task_types tt ON t.task_type_id = tt.id
     LEFT JOIN jobs_components c ON t.component_id = c.id
     WHERE t.employee_id = ? AND t.date >= ? AND t.date <= ?
+      AND t.manager_approved = 0
+      AND t.resolved = 0
     ORDER BY t.date DESC
   `;
 
