@@ -4,24 +4,43 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import UnapprovedTimesheetRow from "./UnapprovedTimesheetRow";
 import { approveTimesheets } from "@/app/projects/actions/approve-timesheets";
+import ProjectTimesheetModal from "./ProjectTimesheetModal";
 
 interface Component {
   id: number;
   component_name: string;
 }
 
+interface Task {
+  id: number;
+  name: string;
+}
+
+interface TaskType {
+  id: number;
+  name: string;
+}
+
 interface TimesheetTableProps {
   entries: any[];
   components: Component[];
+  tasks: Task[];
+  taskTypes: TaskType[];
+  jobId: number;
 }
 
 export default function UnapprovedTimesheetsTable({
   entries,
   components,
+  tasks,
+  taskTypes,
+  jobId,
 }: TimesheetTableProps) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const [modalEntry, setModalEntry] = useState<any | null>(null);
+  const [modalMode, setModalMode] = useState<"edit" | "split">("edit");
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -54,69 +73,97 @@ export default function UnapprovedTimesheetsTable({
     setLoading(false);
   };
 
+  const openEdit = (entry: any) => {
+    setModalEntry(entry);
+    setModalMode("edit");
+  };
+
+  const openSplit = (entry: any) => {
+    setModalEntry(entry);
+    setModalMode("split");
+  };
+
   return (
-    <div className="bg-[--surface] rounded-lg shadow-sm border border-gray-800 overflow-hidden mt-2">
-      <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-200 uppercase tracking-wider text-xs">
-          Recent Time Entries (Unapproved)
-        </h2>
-        {selectedIds.length > 0 && (
-          <button
-            onClick={handleBulkApprove}
-            disabled={loading}
-            className="px-4 py-2 bg-[#0a6481] hover:bg-[#084e66] text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
-          >
-            {loading
-              ? "Approving..."
-              : `Approve Selected (${selectedIds.length})`}
-          </button>
-        )}
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-black/20 text-gray-400 font-medium uppercase text-xs tracking-wider">
-            <tr>
-              <th className="px-3 py-2 w-12 text-center">
-                <input
-                  type="checkbox"
-                  checked={
-                    entries.length > 0 && selectedIds.length === entries.length
-                  }
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="form-checkbox h-4 w-4 text-[var(--accent)] rounded border-[var(--muted)] bg-[var(--background)] focus:ring-offset-[var(--surface)] cursor-pointer"
-                />
-              </th>
-              <th className="px-3 py-2">Date</th>
-              <th className="px-3 py-2">Employee</th>
-              <th className="px-3 py-2">Task</th>
-              <th className="px-3 py-2">Component</th>
-              <th className="px-3 py-2">Notes</th>
-              <th className="px-3 py-2 text-right">Hours</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800">
-            {entries.map((entry) => (
-              <UnapprovedTimesheetRow
-                key={entry.log_id}
-                entry={entry}
-                components={components}
-                isSelected={selectedIds.includes(entry.log_id)}
-                onSelect={(checked) => handleSelectRow(entry.log_id, checked)}
-              />
-            ))}
-            {entries.length === 0 && (
+    <>
+      <div className="bg-[--surface] rounded-lg shadow-sm border border-gray-800 overflow-hidden mt-2">
+        <div className="p-6 border-b border-gray-800 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-200 uppercase tracking-wider text-xs">
+            Recent Time Entries (Unapproved)
+          </h2>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleBulkApprove}
+              disabled={loading}
+              className="px-4 py-2 bg-[#0a6481] hover:bg-[#084e66] text-white text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+            >
+              {loading
+                ? "Approving..."
+                : `Approve Selected (${selectedIds.length})`}
+            </button>
+          )}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-black/20 text-gray-400 font-medium uppercase text-xs tracking-wider">
               <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-12 text-center text-gray-500 italic"
-                >
-                  No time entries found.
-                </td>
+                <th className="px-3 py-2 w-12 text-center">
+                  <input
+                    type="checkbox"
+                    checked={
+                      entries.length > 0 &&
+                      selectedIds.length === entries.length
+                    }
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="form-checkbox h-4 w-4 text-[var(--accent)] rounded border-[var(--muted)] bg-[var(--background)] focus:ring-offset-[var(--surface)] cursor-pointer"
+                  />
+                </th>
+                <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2">Employee</th>
+                <th className="px-3 py-2">Task</th>{" "}
+                <th className="px-3 py-2">Type</th>{" "}
+                <th className="px-3 py-2">Component</th>
+                <th className="px-3 py-2">Notes</th>
+                <th className="px-3 py-2 text-right">Hours</th>
+                <th className="px-3 py-2 text-center">Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-800">
+              {entries.map((entry) => (
+                <UnapprovedTimesheetRow
+                  key={entry.log_id}
+                  entry={entry}
+                  components={components}
+                  isSelected={selectedIds.includes(entry.log_id)}
+                  onSelect={(checked) => handleSelectRow(entry.log_id, checked)}
+                  onEdit={() => openEdit(entry)}
+                  onSplit={() => openSplit(entry)}
+                />
+              ))}
+              {entries.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={9}
+                    className="px-6 py-12 text-center text-gray-500 italic"
+                  >
+                    No time entries found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      <ProjectTimesheetModal
+        entry={modalEntry}
+        components={components}
+        tasks={tasks}
+        taskTypes={taskTypes}
+        jobId={jobId}
+        mode={modalMode}
+        isOpen={modalEntry !== null}
+        onClose={() => setModalEntry(null)}
+      />
+    </>
   );
 }

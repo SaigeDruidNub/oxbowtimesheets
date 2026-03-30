@@ -48,13 +48,33 @@ interface LogEntry {
 interface TimeEntry {
   log_id: number;
   date: string;
+  employee_id: number;
   employee_first: string;
   employee_last: string;
+  task_id: number | null;
   task_name: string;
+  task_type_id: number | null;
+  task_type_name: string;
   component_name: string;
   component_id: number | null;
   hours: number;
+  ot_hours: number;
+  mileage: number;
+  reimbursement: number;
+  commission_amount: number;
+  is_hourly: number;
+  classification_override: string | null;
   notes: string;
+}
+
+interface Task {
+  id: number;
+  name: string;
+}
+
+interface TaskType {
+  id: number;
+  name: string;
 }
 
 async function getProjectDetails(id: string) {
@@ -147,13 +167,18 @@ async function getTimeEntries(jobId: string) {
   const result: any = await query({
     query: `
     SELECT 
-      t.log_id, t.date, t.hours, t.notes, t.component_id,
+      t.log_id, t.date, t.hours, t.ot_hours, t.mileage,
+      t.reimbursement, t.commission_amount, t.is_hourly,
+      t.notes, t.component_id, t.task_id, t.task_type_id,
+      t.classification_override, t.employee_id,
       e.first_name as employee_first, e.last_name as employee_last,
       tsk.name as task_name,
+      tt.name as task_type_name,
       jc.component_name
     FROM timesheets t
     LEFT JOIN employees e ON t.employee_id = e.id 
     LEFT JOIN tasks tsk ON t.task_id = tsk.id
+    LEFT JOIN task_types tt ON t.task_type_id = tt.id
     LEFT JOIN jobs_components jc ON t.component_id = jc.id
     WHERE t.job_id = ? AND (t.manager_approved = 0 OR t.manager_approved IS NULL)
     ORDER BY t.date DESC
@@ -162,6 +187,20 @@ async function getTimeEntries(jobId: string) {
     values: [jobId],
   });
   return result as TimeEntry[];
+}
+
+async function getTasks() {
+  const result: any = await query({
+    query: `SELECT id, name FROM tasks WHERE retired = 0 ORDER BY name ASC`,
+  });
+  return result as Task[];
+}
+
+async function getTaskTypes() {
+  const result: any = await query({
+    query: `SELECT id, name FROM task_types ORDER BY name ASC`,
+  });
+  return result as TaskType[];
 }
 
 export default async function ProjectOverviewPage({
@@ -191,6 +230,8 @@ export default async function ProjectOverviewPage({
     entriesRaw,
     allEmployeesRaw,
     componentsRaw,
+    tasksRaw,
+    taskTypesRaw,
   ] = await Promise.all([
     getProjectDetails(projectId),
     getTeamMembers(projectId),
@@ -199,6 +240,8 @@ export default async function ProjectOverviewPage({
     getTimeEntries(projectId),
     getAllEmployees(),
     getProjectComponents(projectId),
+    getTasks(),
+    getTaskTypes(),
   ]);
 
   const project = projectRaw as ProjectDetails;
@@ -213,6 +256,8 @@ export default async function ProjectOverviewPage({
   const entries = entriesRaw as TimeEntry[];
   const allEmployees = allEmployeesRaw as Employee[];
   const components = componentsRaw as { id: number; component_name: string }[];
+  const tasks = tasksRaw as Task[];
+  const taskTypes = taskTypesRaw as TaskType[];
 
   const totalHours = timeSummary.reduce(
     (sum, item) => sum + (Number(item.total_hours) || 0),
@@ -426,7 +471,13 @@ export default async function ProjectOverviewPage({
         </div>
 
         {/* Detailed Timesheet Table */}
-        <UnapprovedTimesheetsTable entries={entries} components={components} />
+        <UnapprovedTimesheetsTable
+          entries={entries}
+          components={components}
+          tasks={tasks}
+          taskTypes={taskTypes}
+          jobId={project.id}
+        />
       </div>
     </div>
   );

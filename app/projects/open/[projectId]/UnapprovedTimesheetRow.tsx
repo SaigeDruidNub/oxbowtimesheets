@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { approveTimesheet } from "@/app/projects/actions/approve-timesheet";
+import { HiScissors } from "react-icons/hi";
+import { FaEdit } from "react-icons/fa";
 
 interface Component {
   id: number;
@@ -13,6 +15,8 @@ interface TimesheetRowProps {
   components: Component[];
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
+  onEdit: () => void;
+  onSplit: () => void;
 }
 
 export default function UnapprovedTimesheetRow({
@@ -20,6 +24,8 @@ export default function UnapprovedTimesheetRow({
   components,
   isSelected,
   onSelect,
+  onEdit,
+  onSplit,
 }: TimesheetRowProps) {
   const [loading, setLoading] = useState(false);
   const [componentId, setComponentId] = useState<number | null>(
@@ -66,6 +72,9 @@ export default function UnapprovedTimesheetRow({
       <td className="px-3 py-2 whitespace-nowrap text-[var(--foreground)]">
         {entry.task_name}
       </td>
+      <td className="px-3 py-2 whitespace-nowrap text-gray-400 text-xs">
+        {entry.task_type_name || "-"}
+      </td>
       <td className="px-3 py-2 whitespace-nowrap">
         <select
           value={componentId || ""}
@@ -92,6 +101,25 @@ export default function UnapprovedTimesheetRow({
       </td>
       <td className="px-3 py-2 text-right whitespace-nowrap text-[var(--foreground)] font-mono">
         {entry.hours?.toFixed(2)}
+      </td>
+      <td className="px-3 py-2 text-center whitespace-nowrap">
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={onEdit}
+            title="Edit"
+            className="text-gray-400 hover:text-[#0a6481] transition-colors"
+          >
+            <FaEdit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onSplit}
+            disabled={entry.hours <= 0.25}
+            title="Split"
+            className="text-gray-400 hover:text-amber-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <HiScissors className="w-4 h-4" />
+          </button>
+        </div>
       </td>
     </tr>
   );

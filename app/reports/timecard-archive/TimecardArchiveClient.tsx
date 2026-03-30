@@ -7,7 +7,8 @@ import {
   adminUpdateTimesheet,
   adminSplitTimesheet,
 } from "@/app/timesheets/actions/admin-update-timesheet";
-import { FaEdit, FaCodeBranch } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
+import { HiScissors } from "react-icons/hi";
 
 interface Props {
   formData: TimesheetFormData;
@@ -249,7 +250,7 @@ export default function TimecardArchiveClient({ formData }: Props) {
                           className="p-1 hover:text-yellow-400 transition-colors"
                           title="Split"
                         >
-                          <FaCodeBranch />
+                          <HiScissors />
                         </button>
                       </div>
                     </td>
