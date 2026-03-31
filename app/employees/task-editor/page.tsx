@@ -64,7 +64,11 @@ async function getTaskEditorData(): Promise<{
 
 export default async function TaskEditorPage() {
   const session = await auth();
-  if ((session?.user as any)?.accessLevel !== "Admin") {
+  const _taskEditorAccessLevel = (session?.user as any)?.accessLevel;
+  if (
+    _taskEditorAccessLevel !== "Admin" &&
+    _taskEditorAccessLevel !== "Designer Admin"
+  ) {
     redirect("/");
   }
 

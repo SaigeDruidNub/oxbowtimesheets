@@ -23,7 +23,8 @@ export default async function EditDocuments() {
   if (!session) redirect("/api/auth/signin");
 
   const user = session.user as any;
-  if (user?.accessLevel !== "Admin") redirect("/documents/home");
+  if (user?.accessLevel !== "Admin" && user?.accessLevel !== "Designer Admin")
+    redirect("/documents/home");
 
   const userId = (session.user as any)?.id;
   const [docs, ownerAccess] = await Promise.all([

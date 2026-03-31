@@ -17,7 +17,8 @@ export async function submitTimesheet(formData: FormData) {
   // Admins can submit on behalf of another employee
   const targetEmployeeId = formData.get("target_employee_id");
   const employee_id =
-    accessLevel === "Admin" && targetEmployeeId
+    (accessLevel === "Admin" || accessLevel === "Designer Admin") &&
+    targetEmployeeId
       ? targetEmployeeId
       : sessionUserId;
 

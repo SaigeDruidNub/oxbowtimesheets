@@ -141,6 +141,7 @@ export default function EditEmployeeModal({
                 <option value="Employee">Worker</option>
                 <option value="Manager">Manager</option>
                 <option value="Admin">Admin</option>
+                <option value="Designer Admin">Designer Admin</option>
               </select>
             </div>
 

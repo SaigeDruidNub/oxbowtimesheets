@@ -7,6 +7,7 @@ services:
       MYSQL_DATABASE: oxbow_database
       MYSQL_USER: oxbow_user
       MYSQL_PASSWORD: oxbow_password
+    command: --max_connections=200 --wait_timeout=60 --interactive_timeout=60
     ports:
       - "3306:3306"
     volumes:

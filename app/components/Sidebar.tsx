@@ -5,9 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const timesheetsSubmenu = [
-  { label: "My Timesheets", href: "/" },
-  { label: "Admin Timesheets", href: "/timesheets/admin" },
-  { label: "Archived Timesheets", href: "/timesheets/archived" },
+  { label: "My Timesheets", href: "/", adminOnly: false },
+  { label: "Admin Timesheets", href: "/timesheets/admin", adminOnly: true },
+  {
+    label: "Archived Timesheets",
+    href: "/timesheets/archived",
+    adminOnly: false,
+  },
 ];
 
 const projectsSubmenu = [
@@ -36,9 +40,9 @@ const reportsSubmenu = [
 ];
 
 const employeesSubmenu = [
-  { label: "Active Employees", href: "/employees/active" },
-  { label: "Archived Employees", href: "/employees/archived" },
-  { label: "Task Editor", href: "/employees/task-editor" },
+  { label: "Active Employees", href: "/employees/active", adminOnly: true },
+  { label: "Archived Employees", href: "/employees/archived", adminOnly: true },
+  { label: "Task Editor", href: "/employees/task-editor", adminOnly: true },
 ];
 
 /*const uploadsSubmenu = [
@@ -47,8 +51,8 @@ const employeesSubmenu = [
 ];*/
 
 const documentsSubmenu = [
-  { label: "Documents Home", href: "/documents/home" },
-  { label: "Edit Documents", href: "/documents/edit" },
+  { label: "Documents Home", href: "/documents/home", adminOnly: false },
+  { label: "Edit Documents", href: "/documents/edit", adminOnly: true },
 ];
 
 export default function Sidebar({ user }: { user?: any }) {
@@ -60,16 +64,23 @@ export default function Sidebar({ user }: { user?: any }) {
   const [documentsExpanded, setDocumentsExpanded] = useState(false);
 
   // Check access level
-  const isAdmin = user?.accessLevel === "Admin";
+  const isAdmin =
+    user?.accessLevel === "Admin" || user?.accessLevel === "Designer Admin";
   const isManager = user?.accessLevel === "Manager";
+  const isDesignerAdmin = user?.accessLevel === "Designer Admin";
   const hasProjectAccess = isAdmin || isManager;
+  const isCommission = user?.isCommission === true;
+  const hasDesignerUtilizationAccess = isCommission || isDesignerAdmin;
 
   useEffect(() => {
     if (pathname === "/" || pathname.startsWith("/timesheets")) {
       setTimesheetsExpanded(true);
     } else if (pathname.startsWith("/projects") && hasProjectAccess) {
       setProjectsExpanded(true);
-    } else if (pathname.startsWith("/reports")) {
+    } else if (
+      pathname.startsWith("/reports") &&
+      (hasProjectAccess || hasDesignerUtilizationAccess)
+    ) {
       setReportsExpanded(true);
     } else if (pathname.startsWith("/employees")) {
       setEmployeesExpanded(true);
@@ -120,31 +131,33 @@ export default function Sidebar({ user }: { user?: any }) {
                   gap: 4,
                 }}
               >
-                {timesheetsSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
+                {timesheetsSubmenu
+                  .filter(({ adminOnly }) => !adminOnly || isAdmin)
+                  .map(({ label, href }) => {
+                    const isActive = pathname === href;
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          style={{
+                            display: "block",
+                            textDecoration: "none",
+                            fontSize: 14,
+                            fontWeight: isActive ? 700 : 400,
+                            color: isActive ? "#ffffff" : "var(--foreground)",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            background: isActive
+                              ? "var(--accent)"
+                              : "transparent",
+                            transition: "background 0.15s, color 0.15s",
+                          }}
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                  })}
               </ul>
             )}
           </li>
@@ -209,121 +222,153 @@ export default function Sidebar({ user }: { user?: any }) {
             </li>
           )}
 
-          <li style={{ marginBottom: 4 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                color: "var(--foreground)",
-                padding: "6px 0",
-                userSelect: "none",
-              }}
-              onClick={() => setReportsExpanded((prev) => !prev)}
-            >
-              <span>Reports</span>
-              <span style={{ fontSize: 12, marginLeft: 8 }}>
-                {reportsExpanded ? "▾" : "▸"}
-              </span>
-            </div>
-            {reportsExpanded && (
-              <ul
+          {(hasProjectAccess || hasDesignerUtilizationAccess) && (
+            <li style={{ marginBottom: 4 }}>
+              <div
                 style={{
-                  listStyle: "none",
-                  padding: "0 0 0 14px",
-                  margin: "2px 0 6px 0",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  color: "var(--foreground)",
+                  padding: "6px 0",
+                  userSelect: "none",
                 }}
+                onClick={() => setReportsExpanded((prev) => !prev)}
               >
-                {reportsSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
+                <span>Reports</span>
+                <span style={{ fontSize: 12, marginLeft: 8 }}>
+                  {reportsExpanded ? "▾" : "▸"}
+                </span>
+              </div>
+              {reportsExpanded && (
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: "0 0 0 14px",
+                    margin: "2px 0 6px 0",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
+                >
+                  {hasProjectAccess &&
+                    reportsSubmenu.map(({ label, href }) => {
+                      const isActive = pathname === href;
+                      return (
+                        <li key={href}>
+                          <Link
+                            href={href}
+                            style={{
+                              display: "block",
+                              textDecoration: "none",
+                              fontSize: 14,
+                              fontWeight: isActive ? 700 : 400,
+                              color: isActive ? "#ffffff" : "var(--foreground)",
+                              padding: "4px 6px",
+                              borderRadius: 6,
+                              background: isActive
+                                ? "var(--accent)"
+                                : "transparent",
+                              transition: "background 0.15s, color 0.15s",
+                            }}
+                          >
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  {hasDesignerUtilizationAccess &&
+                    (() => {
+                      const href = "/reports/designer-utilization";
+                      const isActive = pathname === href;
+                      return (
+                        <li key={href}>
+                          <Link
+                            href={href}
+                            style={{
+                              display: "block",
+                              textDecoration: "none",
+                              fontSize: 14,
+                              fontWeight: isActive ? 700 : 400,
+                              color: isActive ? "#ffffff" : "var(--foreground)",
+                              padding: "4px 6px",
+                              borderRadius: 6,
+                              background: isActive
+                                ? "var(--accent)"
+                                : "transparent",
+                              transition: "background 0.15s, color 0.15s",
+                            }}
+                          >
+                            Designer Utilization
+                          </Link>
+                        </li>
+                      );
+                    })()}
+                </ul>
+              )}
+            </li>
+          )}
 
-          <li style={{ marginBottom: 4 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-                color: "var(--foreground)",
-                padding: "6px 0",
-                userSelect: "none",
-              }}
-              onClick={() => setEmployeesExpanded((prev) => !prev)}
-            >
-              <span>Employees</span>
-              <span style={{ fontSize: 12, marginLeft: 8 }}>
-                {employeesExpanded ? "▾" : "▸"}
-              </span>
-            </div>
-            {employeesExpanded && (
-              <ul
+          {isAdmin && (
+            <li style={{ marginBottom: 4 }}>
+              <div
                 style={{
-                  listStyle: "none",
-                  padding: "0 0 0 14px",
-                  margin: "2px 0 6px 0",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  color: "var(--foreground)",
+                  padding: "6px 0",
+                  userSelect: "none",
                 }}
+                onClick={() => setEmployeesExpanded((prev) => !prev)}
               >
-                {employeesSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </li>
+                <span>Employees</span>
+                <span style={{ fontSize: 12, marginLeft: 8 }}>
+                  {employeesExpanded ? "▾" : "▸"}
+                </span>
+              </div>
+              {employeesExpanded && (
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: "0 0 0 14px",
+                    margin: "2px 0 6px 0",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                  }}
+                >
+                  {employeesSubmenu.map(({ label, href }) => {
+                    const isActive = pathname === href;
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          style={{
+                            display: "block",
+                            textDecoration: "none",
+                            fontSize: 14,
+                            fontWeight: isActive ? 700 : 400,
+                            color: isActive ? "#ffffff" : "var(--foreground)",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            background: isActive
+                              ? "var(--accent)"
+                              : "transparent",
+                            transition: "background 0.15s, color 0.15s",
+                          }}
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          )}
 
           <li style={{ marginBottom: 4 }}>
             <div
@@ -354,31 +399,33 @@ export default function Sidebar({ user }: { user?: any }) {
                   gap: 4,
                 }}
               >
-                {documentsSubmenu.map(({ label, href }) => {
-                  const isActive = pathname === href;
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        style={{
-                          display: "block",
-                          textDecoration: "none",
-                          fontSize: 14,
-                          fontWeight: isActive ? 700 : 400,
-                          color: isActive ? "#ffffff" : "var(--foreground)",
-                          padding: "4px 6px",
-                          borderRadius: 6,
-                          background: isActive
-                            ? "var(--accent)"
-                            : "transparent",
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
+                {documentsSubmenu
+                  .filter(({ adminOnly }) => !adminOnly || isAdmin)
+                  .map(({ label, href }) => {
+                    const isActive = pathname === href;
+                    return (
+                      <li key={href}>
+                        <Link
+                          href={href}
+                          style={{
+                            display: "block",
+                            textDecoration: "none",
+                            fontSize: 14,
+                            fontWeight: isActive ? 700 : 400,
+                            color: isActive ? "#ffffff" : "var(--foreground)",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            background: isActive
+                              ? "var(--accent)"
+                              : "transparent",
+                            transition: "background 0.15s, color 0.15s",
+                          }}
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                  })}
               </ul>
             )}
           </li>

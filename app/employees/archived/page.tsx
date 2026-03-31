@@ -28,7 +28,11 @@ interface Employee {
 
 export default async function ArchivedEmployeesPage() {
   const session = await auth();
-  if ((session?.user as any)?.accessLevel !== "Admin") {
+  const _archivedAccessLevel = (session?.user as any)?.accessLevel;
+  if (
+    _archivedAccessLevel !== "Admin" &&
+    _archivedAccessLevel !== "Designer Admin"
+  ) {
     redirect("/");
   }
 

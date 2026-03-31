@@ -12,7 +12,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         const result = (await query({
           query:
-            "SELECT id, first_name, last_name, access_level, email FROM employees WHERE email = ?",
+            "SELECT id, first_name, last_name, access_level, is_commission, email FROM employees WHERE email = ?",
           values: [user.email],
         })) as any[];
 
@@ -20,6 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const employee = result[0];
           (user as any).dbId = employee.id;
           (user as any).accessLevel = employee.access_level;
+          (user as any).isCommission = employee.is_commission === 1;
           (user as any).first_name = employee.first_name;
           (user as any).last_name = employee.last_name;
           return true;
@@ -38,6 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user) {
         (session.user as any).id = token.id;
         (session.user as any).accessLevel = token.accessLevel;
+        (session.user as any).isCommission = token.isCommission;
         (session.user as any).first_name = token.first_name;
         (session.user as any).last_name = token.last_name;
       }
@@ -47,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = (user as any).dbId;
         token.accessLevel = (user as any).accessLevel;
+        token.isCommission = (user as any).isCommission;
         token.first_name = (user as any).first_name;
         token.last_name = (user as any).last_name;
       }

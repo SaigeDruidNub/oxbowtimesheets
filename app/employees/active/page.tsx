@@ -29,7 +29,11 @@ interface Employee {
 
 export default async function ActiveEmployeesPage() {
   const session = await auth();
-  if ((session?.user as any)?.accessLevel !== "Admin") {
+  const _activeAccessLevel = (session?.user as any)?.accessLevel;
+  if (
+    _activeAccessLevel !== "Admin" &&
+    _activeAccessLevel !== "Designer Admin"
+  ) {
     redirect("/");
   }
 

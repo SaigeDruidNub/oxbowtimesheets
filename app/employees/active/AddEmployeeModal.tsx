@@ -100,7 +100,7 @@ export default function AddEmployeeModal({
                 <option value="Employee">Employee</option>
                 <option value="Manager">Manager</option>
                 <option value="Admin">Admin</option>
-                {/* Add other levels as needed based on your system */}
+                <option value="Designer Admin">Designer Admin</option>
               </select>
             </div>
 
