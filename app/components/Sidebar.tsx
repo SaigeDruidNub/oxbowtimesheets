@@ -18,7 +18,7 @@ const projectsSubmenu = [
   { label: "My Projects", href: "/projects/my" },
   { label: "Archived Projects", href: "/projects/archived" },
   { label: "Open Projects", href: "/projects/open" },
-  { label: "Commission Projects", href: "/projects/commission" },
+  { label: "Design Projects", href: "/projects/commission" },
   { label: "Project Overview", href: "/projects/overview" },
   { label: "New Project", href: "/projects/new" },
 ];

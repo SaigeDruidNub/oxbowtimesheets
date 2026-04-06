@@ -121,9 +121,11 @@ export default function EditEmployeeModal({
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
                 name="email"
-                type="email"
+                type="text"
                 defaultValue={employee.email}
                 required
+                pattern="hidden|[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                title="Enter a valid email address or 'hidden' to deactivate"
                 className="w-full bg-[var(--background)] border border-[var(--muted)]/40 rounded px-3 py-2 focus:outline-none focus:border-[var(--accent)]"
               />
             </div>

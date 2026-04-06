@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { createProject } from "../actions/create-project";
 
@@ -29,7 +30,7 @@ export default function NewProjectForm({
   taskTypes: any[];
 }) {
   // @ts-ignore
-  const [state, formAction] = useFormState(createProject, initialState);
+  const [state, formAction] = useActionState(createProject, initialState);
 
   // Filter out terminated employees if necessary, but assuming all are active for now or filtering in query
   // Sort employees alphabetically
