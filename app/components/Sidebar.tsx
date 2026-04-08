@@ -34,10 +34,10 @@ const reportsSubmenu = [
   { label: "Open Timesheets", href: "/reports/open-timesheets" },
   { label: "PTO Audit", href: "/reports/pto-audit" },
   { label: "Mileage", href: "/reports/mileage" },
-  { label: "Payroll (New)", href: "/reports/payroll-new" },
+  { label: "Payroll", href: "/reports/payroll-new" },
   { label: "Overview", href: "/reports/overview" },
   { label: "Timecard Archive", href: "/reports/timecard-archive" },
-  { label: "MO Audit (New)", href: "/reports/mo-audit-new" },
+  { label: "MO Audit", href: "/reports/mo-audit-new" },
 ];
 
 const employeesSubmenu = [

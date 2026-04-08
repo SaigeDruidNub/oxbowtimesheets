@@ -1,27 +1,12 @@
-export default function MOAuditNew() {
+import { getActiveEmployees } from "./actions";
+import MOAuditClient from "./MOAuditClient";
+
+export default async function MOAuditNew() {
+  const employees = await getActiveEmployees();
+
   return (
-    <section
-      style={{
-        background: "var(--surface)",
-        borderRadius: 20,
-        padding: "1.5rem 2rem 2rem 2rem",
-        marginBottom: 32,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: 28,
-          fontWeight: 700,
-          margin: 0,
-          color: "var(--foreground)",
-        }}
-      >
-        Reports — MO Audit (New)
-      </h2>
-      <p style={{ color: "var(--foreground)", marginTop: 16 }}>
-        New MO audit details.
-      </p>
-    </section>
+    <div className="p-6">
+      <MOAuditClient employees={employees} />
+    </div>
   );
 }
