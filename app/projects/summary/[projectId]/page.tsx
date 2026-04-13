@@ -36,6 +36,7 @@ export interface LaborEntry {
   employee_last: string;
   task_name: string;
   task_type_name: string;
+  component_id: number | null;
   component_name: string | null;
   hours: number;
   ot_hours: number;
@@ -88,6 +89,45 @@ export interface UpdateRow {
   is_manager_update: number;
 }
 
+export interface ComponentLaborLine {
+  id: number;
+  component_id: number;
+  sort_order: number;
+  is_header: number;
+  phase: string | null;
+  task: string | null;
+  hours: number | null;
+  labor_class: string | null;
+  rate: number | null;
+  hrs_left: number | null;
+  notes: string | null;
+  outstanding_items: string | null;
+  lessons_learned: string | null;
+}
+
+export interface ComponentExpenseLine {
+  id: number;
+  component_id: number;
+  sort_order: number;
+  is_header: number;
+  expense_class: string | null;
+  description: string | null;
+  cost: number | null;
+  multiplier: number | null;
+  contingency: number | null;
+  amount_left: number | null;
+  notes: string | null;
+  outstanding_items: string | null;
+  lessons_learned: string | null;
+}
+
+export interface TaskOption {
+  id: number;
+  name: string;
+  classification: string | null;
+  rate: number | null;
+}
+
 // ─── Data fetchers ────────────────────────────────────────────────────────────
 
 async function getProject(id: string): Promise<ProjectDetails | null> {
@@ -131,6 +171,7 @@ async function getLaborEntries(jobId: string): Promise<LaborEntry[]> {
         e.first_name as employee_first, e.last_name as employee_last,
         tsk.name as task_name,
         tt.name as task_type_name,
+        t.component_id,
         jc.component_name
       FROM timesheets t
       LEFT JOIN employees e ON t.employee_id = e.id
@@ -207,6 +248,46 @@ async function getUpdates(jobId: string): Promise<UpdateRow[]> {
   return result;
 }
 
+async function getComponentLaborLines(
+  jobId: string,
+): Promise<ComponentLaborLine[]> {
+  const result: any = await query({
+    query: `
+      SELECT cll.*
+      FROM component_labor_lines cll
+      JOIN jobs_components jc ON cll.component_id = jc.id
+      WHERE jc.job_id = ?
+      ORDER BY cll.component_id, cll.sort_order
+    `,
+    values: [jobId],
+  });
+  return result;
+}
+
+async function getComponentExpenseLines(
+  jobId: string,
+): Promise<ComponentExpenseLine[]> {
+  const result: any = await query({
+    query: `
+      SELECT cel.*
+      FROM component_expense_lines cel
+      JOIN jobs_components jc ON cel.component_id = jc.id
+      WHERE jc.job_id = ?
+      ORDER BY cel.component_id, cel.sort_order
+    `,
+    values: [jobId],
+  });
+  return result;
+}
+
+async function getTasks(): Promise<TaskOption[]> {
+  const result: any = await query({
+    query: `SELECT id, name, classification, rate FROM tasks WHERE (retired = 0 OR retired IS NULL) ORDER BY name`,
+    values: [],
+  });
+  return result;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProjectSummaryPage({
@@ -219,16 +300,29 @@ export default async function ProjectSummaryPage({
 
   const { projectId } = await params;
 
-  const [project, team, labor, components, estimates, deposits, updates] =
-    await Promise.all([
-      getProject(projectId),
-      getTeam(projectId),
-      getLaborEntries(projectId),
-      getComponents(projectId),
-      getEstimates(projectId),
-      getDeposits(projectId),
-      getUpdates(projectId),
-    ]);
+  const [
+    project,
+    team,
+    labor,
+    components,
+    estimates,
+    deposits,
+    updates,
+    laborLines,
+    expenseLines,
+    tasks,
+  ] = await Promise.all([
+    getProject(projectId),
+    getTeam(projectId),
+    getLaborEntries(projectId),
+    getComponents(projectId),
+    getEstimates(projectId),
+    getDeposits(projectId),
+    getUpdates(projectId),
+    getComponentLaborLines(projectId),
+    getComponentExpenseLines(projectId),
+    getTasks(),
+  ]);
 
   if (!project) notFound();
 
@@ -272,6 +366,10 @@ export default async function ProjectSummaryPage({
         estimates={estimates}
         deposits={deposits}
         updates={updates}
+        projectId={project.id}
+        laborLines={laborLines}
+        expenseLines={expenseLines}
+        tasks={tasks}
       />
     </div>
   );

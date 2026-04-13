@@ -9,7 +9,7 @@ export async function addComponent(jobId: number | string, name: string) {
 
   try {
     const result: any = await query({
-      query: `INSERT INTO jobs_components (job_id, component_name) VALUES (?, ?)`,
+      query: `INSERT INTO jobs_components (job_id, component_name, budget) VALUES (?, ?, 0)`,
       values: [jobId, name.trim()],
     });
 

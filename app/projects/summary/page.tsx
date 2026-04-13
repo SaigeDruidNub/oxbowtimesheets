@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { query } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import NewProjectSummaryButton from "./NewProjectSummaryButton";
 
 async function getProjects() {
   const result: any = await query({
@@ -25,17 +26,39 @@ async function getProjects() {
   }[];
 }
 
+async function getProjectsWithoutSummary() {
+  const result: any = await query({
+    query: `
+      SELECT j.id, j.legacy_id, j.job_name, j.status
+      FROM jobs j
+      LEFT JOIN project_summaries ps ON ps.job_id = j.id AND ps.is_active = 1
+      WHERE ps.id IS NULL
+      ORDER BY j.job_name ASC
+    `,
+  });
+  return result as {
+    id: number;
+    legacy_id: string | null;
+    job_name: string;
+    status: string;
+  }[];
+}
+
 export default async function ProjectSummaryIndexPage() {
   const session = await auth();
   if (!session) redirect("/api/auth/signin");
 
-  const projects = await getProjects();
+  const [projects, availableProjects] = await Promise.all([
+    getProjects(),
+    getProjectsWithoutSummary(),
+  ]);
 
   return (
     <div className="flex flex-col bg-[--background] text-[--foreground] p-6">
-      <h1 className="text-3xl font-light mb-6 border-b border-gray-800 pb-4">
-        Project Summary
-      </h1>
+      <div className="flex items-end justify-between mb-6 border-b border-gray-800 pb-4">
+        <h1 className="text-3xl font-light">Project Summary</h1>
+        <NewProjectSummaryButton availableProjects={availableProjects} />
+      </div>
       <p className="text-gray-400 mb-6 text-sm">
         Select a project to view its full summary.
       </p>
