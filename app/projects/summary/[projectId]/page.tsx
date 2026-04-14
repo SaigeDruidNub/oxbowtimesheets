@@ -48,6 +48,7 @@ export interface LaborEntry {
 export interface ComponentBudget {
   id: number;
   component_name: string;
+  description: string | null;
   budget: number;
   is_closed: number;
   actual_hours: number;
@@ -98,6 +99,7 @@ export interface ComponentLaborLine {
   task: string | null;
   hours: number | null;
   labor_class: string | null;
+  billing_type: string | null;
   rate: number | null;
   hrs_left: number | null;
   notes: string | null;
@@ -126,6 +128,11 @@ export interface TaskOption {
   name: string;
   classification: string | null;
   rate: number | null;
+}
+
+export interface ProjectClassRate {
+  labor_class: string;
+  rate: number;
 }
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────
@@ -190,7 +197,7 @@ async function getComponents(jobId: string): Promise<ComponentBudget[]> {
   const result: any = await query({
     query: `
       SELECT
-        jc.id, jc.component_name, jc.budget, jc.is_closed,
+        jc.id, jc.component_name, jc.description, jc.budget, jc.is_closed,
         COALESCE(SUM(t.hours + COALESCE(t.ot_hours, 0)), 0) as actual_hours
       FROM jobs_components jc
       LEFT JOIN timesheets t ON t.component_id = jc.id
@@ -280,6 +287,14 @@ async function getComponentExpenseLines(
   return result;
 }
 
+async function getClassRates(jobId: string): Promise<ProjectClassRate[]> {
+  const result: any = await query({
+    query: `SELECT labor_class, rate FROM job_class_rates WHERE job_id = ?`,
+    values: [jobId],
+  });
+  return result;
+}
+
 async function getTasks(): Promise<TaskOption[]> {
   const result: any = await query({
     query: `SELECT id, name, classification, rate FROM tasks WHERE (retired = 0 OR retired IS NULL) ORDER BY name`,
@@ -311,6 +326,7 @@ export default async function ProjectSummaryPage({
     laborLines,
     expenseLines,
     tasks,
+    classRates,
   ] = await Promise.all([
     getProject(projectId),
     getTeam(projectId),
@@ -322,6 +338,7 @@ export default async function ProjectSummaryPage({
     getComponentLaborLines(projectId),
     getComponentExpenseLines(projectId),
     getTasks(),
+    getClassRates(projectId),
   ]);
 
   if (!project) notFound();
@@ -370,6 +387,7 @@ export default async function ProjectSummaryPage({
         laborLines={laborLines}
         expenseLines={expenseLines}
         tasks={tasks}
+        classRates={classRates}
       />
     </div>
   );

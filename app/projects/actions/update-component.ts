@@ -2,15 +2,19 @@
 
 import { query } from "@/lib/db";
 
-export async function updateComponent(id: number, name: string) {
+export async function updateComponent(
+  id: number,
+  name: string,
+  description?: string,
+) {
   if (!name || !name.trim()) {
     return { error: "Component name is required" };
   }
 
   try {
-    const result: any = await query({
-      query: `UPDATE jobs_components SET component_name = ? WHERE id = ?`,
-      values: [name.trim(), id],
+    await query({
+      query: `UPDATE jobs_components SET component_name = ?, description = ? WHERE id = ?`,
+      values: [name.trim(), description ?? null, id],
     });
 
     return { success: true };

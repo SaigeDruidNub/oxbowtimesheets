@@ -9,6 +9,7 @@ export interface LaborLineInput {
   task: string;
   hours: number | null;
   labor_class: string;
+  billing_type?: string | null;
   rate: number | null;
   hrs_left: number | null;
   notes: string;
@@ -53,8 +54,8 @@ export async function saveComponentLines(
       await query({
         query: `
           INSERT INTO component_labor_lines
-            (component_id, sort_order, is_header, phase, task, hours, labor_class, rate, hrs_left, notes, outstanding_items, lessons_learned)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (component_id, sort_order, is_header, phase, task, hours, labor_class, billing_type, rate, hrs_left, notes, outstanding_items, lessons_learned)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         values: [
           componentId,
@@ -64,6 +65,7 @@ export async function saveComponentLines(
           line.task || null,
           line.hours ?? null,
           line.labor_class || null,
+          line.billing_type || null,
           line.rate ?? null,
           line.hrs_left ?? null,
           line.notes || null,
