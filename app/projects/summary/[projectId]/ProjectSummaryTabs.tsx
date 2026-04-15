@@ -22,6 +22,7 @@ import { EstimatesTab } from "./tabs/EstimatesTab";
 import { ProposalTab } from "./tabs/ProposalTab";
 import { QBImportTab } from "./tabs/QBImportTab";
 import { QBAllocationTab } from "./tabs/QBAllocationTab";
+import { WeeklyWorkTab } from "./tabs/WeeklyWorkTab";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -31,7 +32,8 @@ const TABS = [
   { id: "estimates", label: "Estimates" },
   { id: "proposal", label: "Proposal" },
   { id: "updates", label: "QB Import" },
-  { id: "qb-allocate", label: "QB Allocate" },
+  { id: "qb-allocate", label: "QB Billable Expenses" },
+  { id: "weekly-work", label: "Weekly Work & Components" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -153,6 +155,13 @@ export default function ProjectSummaryTabs({
           expenses={qbExpenses}
           components={components}
           initialAllocations={qbAllocations}
+        />
+      )}
+      {activeTab === "weekly-work" && (
+        <WeeklyWorkTab
+          labor={labor}
+          laborLines={laborLines}
+          estimates={estimates}
         />
       )}
     </div>

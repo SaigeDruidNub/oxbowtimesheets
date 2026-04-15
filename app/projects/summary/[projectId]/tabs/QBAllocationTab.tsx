@@ -600,11 +600,7 @@ export function QBAllocationTab({
                           {/* Amount — first split only */}
                           <td className="px-3 py-1.5 text-right tabular-nums text-xs">
                             {si === 0 ? (
-                              <span
-                                className={
-                                  expAmt < 0 ? "text-red-400" : "text-gray-200"
-                                }
-                              >
+                              <span className="text-gray-200">
                                 {fmtCurrency(expAmt)}
                               </span>
                             ) : (

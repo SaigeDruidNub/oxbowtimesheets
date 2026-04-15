@@ -34,10 +34,12 @@ export interface TeamMember {
 export interface LaborEntry {
   log_id: number;
   date: string;
+  yearweek: number;
   employee_first: string;
   employee_last: string;
   task_name: string;
   task_type_name: string;
+  task_classification: string | null;
   component_id: number | null;
   component_name: string | null;
   hours: number;
@@ -177,9 +179,11 @@ async function getLaborEntries(jobId: string): Promise<LaborEntry[]> {
       SELECT
         t.log_id, t.date, t.hours, t.ot_hours, t.mileage,
         t.reimbursement, t.notes,
+        YEARWEEK(t.date, 0) % 10000 as yearweek,
         e.first_name as employee_first, e.last_name as employee_last,
         tsk.name as task_name,
         tt.name as task_type_name,
+        tsk.classification as task_classification,
         t.component_id,
         jc.component_name
       FROM timesheets t
