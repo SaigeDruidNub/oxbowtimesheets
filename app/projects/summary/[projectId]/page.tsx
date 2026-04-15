@@ -84,16 +84,6 @@ export interface DepositRow {
   overseer_payment_id: number | null;
 }
 
-export interface UpdateRow {
-  id: number;
-  date: string;
-  text: string;
-  author_first: string;
-  author_last: string;
-  auto_entry: number;
-  is_manager_update: number;
-}
-
 export interface ComponentLaborLine {
   id: number;
   component_id: number;
@@ -125,6 +115,28 @@ export interface ComponentExpenseLine {
   notes: string | null;
   outstanding_items: string | null;
   lessons_learned: string | null;
+}
+
+export interface ChangeOrderRow {
+  id: number;
+  job_id: number;
+  component_id: number | null;
+  date: string | null;
+  description: string | null;
+  amount: number | null;
+  pending_approval: number;
+  approved: number;
+  sort_order: number;
+  is_header: number;
+  is_subheader: number;
+  locked: number;
+}
+
+export interface BudgetUpdateSettings {
+  original_contract: number | null;
+  update_number: string | null;
+  update_title: string | null;
+  paid_through_deposit_id: number | null;
 }
 
 export interface TaskOption {
@@ -246,21 +258,6 @@ async function getDeposits(jobId: string): Promise<DepositRow[]> {
   return result;
 }
 
-async function getUpdates(jobId: string): Promise<UpdateRow[]> {
-  const result: any = await query({
-    query: `
-      SELECT pu.id, pu.date, pu.text, pu.auto_entry, pu.is_manager_update,
-             e.first_name as author_first, e.last_name as author_last
-      FROM project_updates pu
-      LEFT JOIN employees e ON pu.author_id = e.id
-      WHERE pu.job_id = ?
-      ORDER BY pu.date DESC, pu.created DESC
-    `,
-    values: [jobId],
-  });
-  return result;
-}
-
 async function getComponentLaborLines(
   jobId: string,
 ): Promise<ComponentLaborLine[]> {
@@ -301,6 +298,41 @@ async function getClassRates(jobId: string): Promise<ProjectClassRate[]> {
   return result;
 }
 
+async function getChangeOrders(jobId: string): Promise<ChangeOrderRow[]> {
+  const result: any = await query({
+    query: `
+      SELECT id, job_id, component_id, date, description, amount,
+             pending_approval, approved, sort_order, is_header, is_subheader, locked
+      FROM change_orders
+      WHERE job_id = ?
+      ORDER BY sort_order, id
+    `,
+    values: [jobId],
+  });
+  return result;
+}
+
+async function getBudgetUpdateSettings(
+  jobId: string,
+): Promise<BudgetUpdateSettings> {
+  const result: any = await query({
+    query: `
+      SELECT original_contract, update_number, update_title, paid_through_deposit_id
+      FROM job_budget_update
+      WHERE job_id = ?
+    `,
+    values: [jobId],
+  });
+  return (
+    result[0] ?? {
+      original_contract: null,
+      update_number: null,
+      update_title: null,
+      paid_through_deposit_id: null,
+    }
+  );
+}
+
 async function getTasks(): Promise<TaskOption[]> {
   const result: any = await query({
     query: `SELECT id, name, classification, rate FROM tasks WHERE (retired = 0 OR retired IS NULL) ORDER BY name`,
@@ -328,13 +360,14 @@ export default async function ProjectSummaryPage({
     components,
     estimates,
     deposits,
-    updates,
     laborLines,
     expenseLines,
     tasks,
     classRates,
     qbExpenses,
     qbAllocations,
+    changeOrders,
+    budgetUpdateSettings,
   ] = await Promise.all([
     getProject(projectId),
     getTeam(projectId),
@@ -342,13 +375,14 @@ export default async function ProjectSummaryPage({
     getComponents(projectId),
     getEstimates(projectId),
     getDeposits(projectId),
-    getUpdates(projectId),
     getComponentLaborLines(projectId),
     getComponentExpenseLines(projectId),
     getTasks(),
     getClassRates(projectId),
     getQBExpenses(Number(projectId)),
     getProjectExpenseAllocations(Number(projectId)),
+    getChangeOrders(projectId),
+    getBudgetUpdateSettings(projectId),
   ]);
 
   if (!project) notFound();
@@ -392,7 +426,6 @@ export default async function ProjectSummaryPage({
         components={components}
         estimates={estimates}
         deposits={deposits}
-        updates={updates}
         projectId={project.id}
         laborLines={laborLines}
         expenseLines={expenseLines}
@@ -400,6 +433,8 @@ export default async function ProjectSummaryPage({
         classRates={classRates}
         qbExpenses={qbExpenses}
         qbAllocations={qbAllocations}
+        changeOrders={changeOrders}
+        budgetUpdateSettings={budgetUpdateSettings}
       />
     </div>
   );

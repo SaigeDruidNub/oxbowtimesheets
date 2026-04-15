@@ -11,25 +11,28 @@ import type {
   TaskOption,
   EstimateRow,
   DepositRow,
-  UpdateRow,
   ProjectClassRate,
+  ChangeOrderRow,
+  BudgetUpdateSettings,
 } from "./page";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { LaborTab } from "./tabs/LaborTab";
 import { ComponentsTab } from "./tabs/ComponentsTab";
-import { BudgetTab } from "./tabs/BudgetTab";
+import { ChangeOrdersTab } from "./tabs/ChangeOrdersTab";
 import { EstimatesTab } from "./tabs/EstimatesTab";
 import { ProposalTab } from "./tabs/ProposalTab";
 import { QBImportTab } from "./tabs/QBImportTab";
 import { QBAllocationTab } from "./tabs/QBAllocationTab";
 import { WeeklyWorkTab } from "./tabs/WeeklyWorkTab";
 import { UpdateTab } from "./tabs/UpdateTab";
+import { BudgetUpdateTab } from "./tabs/BudgetUpdateTab";
 
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "labor", label: "Labor" },
   { id: "components", label: "Components" },
-  { id: "budget", label: "Budget" },
+  { id: "budget", label: "Change Orders" },
+  { id: "budget-update", label: "Budget Update" },
   { id: "estimates", label: "Estimates" },
   { id: "proposal", label: "Proposal" },
   { id: "updates", label: "QB Import" },
@@ -47,7 +50,6 @@ interface Props {
   components: ComponentBudget[];
   estimates: EstimateRow[];
   deposits: DepositRow[];
-  updates: UpdateRow[];
   qbExpenses: {
     id: number;
     date: string | null;
@@ -70,6 +72,8 @@ interface Props {
   expenseLines: ComponentExpenseLine[];
   tasks: TaskOption[];
   classRates: ProjectClassRate[];
+  changeOrders: ChangeOrderRow[];
+  budgetUpdateSettings: BudgetUpdateSettings;
 }
 
 export default function ProjectSummaryTabs({
@@ -79,7 +83,6 @@ export default function ProjectSummaryTabs({
   components,
   estimates,
   deposits,
-  updates,
   qbExpenses,
   qbAllocations,
   projectId,
@@ -87,9 +90,29 @@ export default function ProjectSummaryTabs({
   expenseLines,
   tasks,
   classRates,
+  changeOrders,
+  budgetUpdateSettings,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [contingency, setContingency] = useState(10);
+
+  const estimatesTotal = components.reduce((acc, c) => {
+    const ll = laborLines.filter(
+      (l) => l.component_id === c.id && !l.is_header,
+    );
+    const el = expenseLines.filter(
+      (l) => l.component_id === c.id && !l.is_header,
+    );
+    const labor = ll.reduce(
+      (s, l) => s + (Number(l.hours) || 0) * (Number(l.rate) || 0),
+      0,
+    );
+    const expenses = el.reduce(
+      (s, l) => s + (Number(l.cost) || 0) * (Number(l.multiplier) || 1),
+      0,
+    );
+    return acc + (labor + expenses) * (1 + contingency / 100);
+  }, 0);
 
   return (
     <div>
@@ -129,7 +152,23 @@ export default function ProjectSummaryTabs({
           classRates={classRates}
         />
       )}
-      {activeTab === "budget" && <BudgetTab components={components} />}
+      {activeTab === "budget" && (
+        <ChangeOrdersTab
+          projectId={projectId}
+          components={components}
+          initialRows={changeOrders}
+        />
+      )}
+      {activeTab === "budget-update" && (
+        <BudgetUpdateTab
+          project={project}
+          qbExpenses={qbExpenses}
+          changeOrders={changeOrders}
+          budgetUpdateSettings={budgetUpdateSettings}
+          projectId={projectId}
+          estimatesTotal={estimatesTotal}
+        />
+      )}
       {activeTab === "estimates" && (
         <EstimatesTab
           components={components}
