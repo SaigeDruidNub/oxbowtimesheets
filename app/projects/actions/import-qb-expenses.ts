@@ -24,11 +24,18 @@ export async function importQBExpenses(
       const parsedAmount = amount === "" ? null : parseFloat(amount);
 
       // Normalize date: QB exports MM/DD/YYYY → MySQL needs YYYY-MM-DD
+      // Also handles M/D/YY shorthand and YYYY-MM-DD pass-through.
       let dateVal: string | null = row.date.trim() || null;
       if (dateVal) {
-        const mmddyyyy = dateVal.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (mmddyyyy) {
-          dateVal = `${mmddyyyy[3]}-${mmddyyyy[1].padStart(2, "0")}-${mmddyyyy[2].padStart(2, "0")}`;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+          // Already YYYY-MM-DD — pass through
+        } else {
+          const mdy = dateVal.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+          if (mdy) {
+            let year = parseInt(mdy[3], 10);
+            if (year < 100) year += year < 50 ? 2000 : 1900;
+            dateVal = `${year}-${mdy[1].padStart(2, "0")}-${mdy[2].padStart(2, "0")}`;
+          }
         }
       }
 

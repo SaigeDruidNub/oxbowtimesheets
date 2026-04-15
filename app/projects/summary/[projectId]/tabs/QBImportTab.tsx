@@ -160,6 +160,43 @@ function nextKey() {
   return ++_keyCounter;
 }
 
+/** Normalise any common date input to YYYY-MM-DD for the date input and for MySQL. */
+function normalizeDateToYMD(val: string): string {
+  const s = val.trim();
+  if (!s) return "";
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // M/D/YY or M/D/YYYY
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (mdy) {
+    let year = parseInt(mdy[3], 10);
+    if (year < 100) year += year < 50 ? 2000 : 1900;
+    return `${year}-${mdy[1].padStart(2, "0")}-${mdy[2].padStart(2, "0")}`;
+  }
+  return s;
+}
+
+/** Display a YYYY-MM-DD string as M/D/YYYY for readability in staged rows. */
+function fmtStagedDate(d: string): string {
+  if (!d) return "—";
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return `${parseInt(m[2])}/${parseInt(m[3])}/${m[1]}`;
+  return d;
+}
+
+const EMPTY_MANUAL_ROW: QBExpenseRow = {
+  date: "",
+  type: "",
+  no: "",
+  memo: "",
+  amount: "",
+  status: "",
+};
+
+interface ManualStagedRow extends QBExpenseRow {
+  _key: number;
+}
+
 export function QBImportTab({ projectId, existingExpenses }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -169,6 +206,55 @@ export function QBImportTab({ projectId, existingExpenses }: Props) {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importOk, setImportOk] = useState<number | null>(null);
+
+  // Manual entry state
+  const [draft, setDraft] = useState<QBExpenseRow>({ ...EMPTY_MANUAL_ROW });
+  const [staged, setStaged] = useState<ManualStagedRow[]>([]);
+  const [manualImporting, setManualImporting] = useState(false);
+  const [manualError, setManualError] = useState<string | null>(null);
+  const [manualOk, setManualOk] = useState<number | null>(null);
+
+  function updateDraft(field: keyof QBExpenseRow, value: string) {
+    setDraft((d) => ({ ...d, [field]: value }));
+  }
+
+  function addManualRow() {
+    if (!draft.memo && !draft.amount && !draft.date) return;
+    setStaged((s) => [...s, { ...draft, _key: nextKey() }]);
+    setDraft({ ...EMPTY_MANUAL_ROW });
+  }
+
+  function removeStaged(key: number) {
+    setStaged((s) => s.filter((r) => r._key !== key));
+  }
+
+  async function handleManualImport() {
+    if (!staged.length) return;
+    setManualImporting(true);
+    setManualError(null);
+    setManualOk(null);
+
+    const result = await importQBExpenses(
+      projectId,
+      staged.map(({ date, type, no, memo, amount, status }) => ({
+        date,
+        type,
+        no,
+        memo,
+        amount,
+        status,
+      })),
+    );
+
+    setManualImporting(false);
+    if (result.error) {
+      setManualError(result.error);
+    } else {
+      setManualOk(result.imported ?? 0);
+      setStaged([]);
+      router.refresh();
+    }
+  }
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -195,10 +281,7 @@ export function QBImportTab({ projectId, existingExpenses }: Props) {
         // Key: no|normalizedDate|normalizedAmount
         const existingKeys = new Set(
           existingExpenses.map((e) => {
-            const d =
-              e.date instanceof Date
-                ? (e.date as Date).toISOString().slice(0, 10)
-                : String(e.date ?? "").slice(0, 10);
+            const d = String(e.date ?? "").slice(0, 10);
             const amt = String(Math.round((Number(e.amount) || 0) * 100));
             return `${(e.no ?? "").trim()}|${d}|${amt}`;
           }),
@@ -322,6 +405,185 @@ export function QBImportTab({ projectId, existingExpenses }: Props) {
 
         {parseError && (
           <p className="mt-3 text-sm text-red-400">{parseError}</p>
+        )}
+      </div>
+
+      {/* ── Manual Entry ── */}
+      <div className="bg-[--surface] border border-gray-800 rounded-lg p-5">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+          Manual Entry
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Add expense rows that aren&apos;t in the QB export. Fill in the fields
+          and click <span className="text-gray-300">Add Row</span>, then submit
+          all staged rows at once.
+        </p>
+
+        {/* Draft input row */}
+        <div className="grid grid-cols-[1fr_1fr_1fr_2fr_1fr_1fr_auto] gap-2 mb-3 items-end">
+          {(
+            [
+              {
+                label: "Date",
+                field: "date",
+                placeholder: "",
+                inputType: "date",
+              },
+              {
+                label: "Type",
+                field: "type",
+                placeholder: "Check, Bill…",
+                inputType: "text",
+              },
+              {
+                label: "No.",
+                field: "no",
+                placeholder: "Ref #",
+                inputType: "text",
+              },
+              {
+                label: "Memo",
+                field: "memo",
+                placeholder: "Description",
+                inputType: "text",
+              },
+              {
+                label: "Amount",
+                field: "amount",
+                placeholder: "0.00",
+                inputType: "text",
+              },
+              {
+                label: "Status",
+                field: "status",
+                placeholder: "Open, Paid…",
+                inputType: "text",
+              },
+            ] as {
+              label: string;
+              field: keyof QBExpenseRow;
+              placeholder: string;
+              inputType: string;
+            }[]
+          ).map(({ label, field, placeholder, inputType }) => (
+            <div key={field} className="flex flex-col gap-1">
+              <label className="text-[10px] uppercase tracking-wider text-[var(--muted)]">
+                {label}
+              </label>
+              <input
+                type={inputType}
+                value={draft[field]}
+                onChange={(e) => updateDraft(field, e.target.value)}
+                placeholder={placeholder}
+                onBlur={
+                  field === "date"
+                    ? (e) => {
+                        const norm = normalizeDateToYMD(e.target.value);
+                        if (norm !== e.target.value) updateDraft("date", norm);
+                      }
+                    : undefined
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addManualRow();
+                }}
+                className="bg-[var(--background)] border border-[var(--muted)]/40 text-[var(--foreground)] text-sm rounded px-2 py-1.5 placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent)] w-full"
+              />
+            </div>
+          ))}
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-wider text-transparent select-none">
+              &nbsp;
+            </span>
+            <button
+              onClick={addManualRow}
+              disabled={!draft.memo && !draft.amount && !draft.date}
+              className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white rounded transition-colors whitespace-nowrap"
+            >
+              + Add Row
+            </button>
+          </div>
+        </div>
+
+        {/* Staged rows */}
+        {staged.length > 0 && (
+          <div className="mt-3 border border-gray-800 rounded overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800">
+              <span className="text-xs text-gray-400">
+                {staged.length} row{staged.length !== 1 ? "s" : ""} staged
+              </span>
+              <div className="flex items-center gap-3">
+                {manualError && (
+                  <span className="text-red-400 text-xs">{manualError}</span>
+                )}
+                {manualOk !== null && (
+                  <span className="text-green-400 text-xs">
+                    {manualOk} row{manualOk !== 1 ? "s" : ""} imported ✓
+                  </span>
+                )}
+                <button
+                  onClick={handleManualImport}
+                  disabled={manualImporting}
+                  className="px-3 py-1.5 text-sm bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 text-white rounded transition-opacity"
+                >
+                  {manualImporting
+                    ? "Importing…"
+                    : `Import ${staged.length} Row${staged.length !== 1 ? "s" : ""}`}
+                </button>
+              </div>
+            </div>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-gray-800 text-left text-xs text-gray-400 uppercase tracking-wider">
+                  <th className="px-3 py-2 w-32">Date</th>
+                  <th className="px-3 py-2 w-24">Type</th>
+                  <th className="px-3 py-2 w-24">No.</th>
+                  <th className="px-3 py-2">Memo</th>
+                  <th className="px-3 py-2 text-right w-28">Amount</th>
+                  <th className="px-3 py-2 w-28">Status</th>
+                  <th className="px-3 py-2 w-8" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800/60">
+                {staged.map((row) => (
+                  <tr key={row._key} className="hover:bg-white/[0.02]">
+                    <td className="px-3 py-1.5 text-gray-300 whitespace-nowrap">
+                      {fmtStagedDate(row.date)}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-400">
+                      {row.type || "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-400">
+                      {row.no || "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-200">
+                      {row.memo || "—"}
+                    </td>
+                    <td
+                      className={`px-3 py-1.5 text-right tabular-nums ${
+                        parseFloat(row.amount.replace(/[$,]/g, "")) < 0
+                          ? "text-red-400"
+                          : "text-gray-200"
+                      }`}
+                    >
+                      {row.amount || "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-400">
+                      {row.status || "—"}
+                    </td>
+                    <td className="px-3 py-1.5 text-center">
+                      <button
+                        onClick={() => removeStaged(row._key)}
+                        className="text-gray-600 hover:text-red-400 transition-colors text-base leading-none"
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

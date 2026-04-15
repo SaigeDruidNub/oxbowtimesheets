@@ -120,28 +120,59 @@ export function WeeklyWorkTab({ labor, laborLines, estimates }: Props) {
     "px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 bg-[--surface]";
 
   return (
-    <div className="bg-[--surface] border border-gray-800 rounded-lg overflow-hidden">
-      <div className="overflow-x-auto" style={{ maxHeight: "72vh" }}>
-        <table className="text-xs border-collapse" style={{ borderSpacing: 0 }}>
-          <thead style={{ position: "sticky", top: 0, zIndex: 20 }}>
+    <div className="bg-[--surface] border border-gray-800 rounded-lg">
+      <div
+        className="overflow-x-auto overflow-y-auto rounded-lg"
+        style={{ maxHeight: "72vh" }}
+      >
+        <table className="text-xs border-separate" style={{ borderSpacing: 0 }}>
+          <thead>
             {/* ── Total Estimated row ───────────────────────────────────── */}
-            <tr className="border-b border-gray-700 bg-[--surface]">
+            <tr>
               <td
-                className="px-2 py-1 text-[10px] text-gray-500 italic bg-[--surface] min-w-[140px]"
-                style={{ position: "sticky", left: 0 }}
+                className="px-2 py-1 text-[10px] text-gray-500 italic min-w-[140px] border-b border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  left: 0,
+                  zIndex: 30,
+                  backgroundColor: "var(--surface)",
+                }}
               >
                 {updatedLabel}
               </td>
-              <td className="px-2 py-1 text-right tabular-nums text-gray-300 font-medium whitespace-nowrap w-14">
+              <td
+                className="px-2 py-1 text-right tabular-nums text-gray-300 font-medium whitespace-nowrap w-14 border-b border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
                 {totalEst.toFixed(2)} ←
               </td>
-              <td className="px-2 py-1 text-[10px] text-gray-400 tracking-wide uppercase min-w-[160px]">
+              <td
+                className="px-2 py-1 text-[10px] text-gray-400 tracking-wide uppercase min-w-[160px] border-b border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
                 Total Estimated
               </td>
               {cols.map((k) => (
                 <td
                   key={k}
-                  className="px-2 py-1 text-right tabular-nums text-gray-400 min-w-[54px]"
+                  className="px-2 py-1 text-right tabular-nums text-gray-400 min-w-[54px] border-b border-gray-700"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 20,
+                    backgroundColor: "var(--surface)",
+                  }}
                 >
                   {estByCol[k] ? fmtH(estByCol[k]) : ""}
                 </td>
@@ -149,21 +180,49 @@ export function WeeklyWorkTab({ labor, laborLines, estimates }: Props) {
             </tr>
 
             {/* ── Total Recorded row ────────────────────────────────────── */}
-            <tr className="border-b border-gray-800 bg-[--surface]">
+            <tr>
               <td
-                className="bg-[--surface]"
-                style={{ position: "sticky", left: 0 }}
+                className="border-b border-gray-800"
+                style={{
+                  position: "sticky",
+                  top: 28,
+                  left: 0,
+                  zIndex: 30,
+                  backgroundColor: "var(--surface)",
+                }}
               />
-              <td className="px-2 py-1 text-right tabular-nums text-[--accent] font-medium whitespace-nowrap">
+              <td
+                className="px-2 py-1 text-right tabular-nums text-[--accent] font-medium whitespace-nowrap border-b border-gray-800"
+                style={{
+                  position: "sticky",
+                  top: 28,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
                 {totalRec.toFixed(2)} ←
               </td>
-              <td className="px-2 py-1 text-[10px] text-gray-400 tracking-wide uppercase">
+              <td
+                className="px-2 py-1 text-[10px] text-gray-400 tracking-wide uppercase border-b border-gray-800"
+                style={{
+                  position: "sticky",
+                  top: 28,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
                 Total Recorded
               </td>
               {cols.map((k) => (
                 <td
                   key={k}
-                  className="px-2 py-1 text-right tabular-nums text-gray-300"
+                  className="px-2 py-1 text-right tabular-nums text-gray-300 border-b border-gray-800"
+                  style={{
+                    position: "sticky",
+                    top: 28,
+                    zIndex: 20,
+                    backgroundColor: "var(--surface)",
+                  }}
                 >
                   {recByCol[k] ? fmtH(recByCol[k]) : ""}
                 </td>
@@ -171,19 +230,54 @@ export function WeeklyWorkTab({ labor, laborLines, estimates }: Props) {
             </tr>
 
             {/* ── Column header row ─────────────────────────────────────── */}
-            <tr className="border-b-2 border-gray-700 bg-[--surface]">
+            <tr>
               <th
-                className={`${thCls} text-left`}
-                style={{ position: "sticky", left: 0 }}
+                className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-left border-b-2 border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 56,
+                  left: 0,
+                  zIndex: 30,
+                  backgroundColor: "var(--surface)",
+                }}
               >
                 Component
               </th>
-              <th className={`${thCls} text-center w-14`}>Week #</th>
-              <th className={`${thCls} text-left`}>Task</th>
+              <th
+                className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-center w-14 border-b-2 border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 56,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
+                Week #
+              </th>
+              <th
+                className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-left border-b-2 border-gray-700"
+                style={{
+                  position: "sticky",
+                  top: 56,
+                  zIndex: 20,
+                  backgroundColor: "var(--surface)",
+                }}
+              >
+                Task
+              </th>
               {cols.map((k) => {
                 const [type, cls] = k.split("\t");
                 return (
-                  <th key={k} className={`${thCls} text-right min-w-[54px]`}>
+                  <th
+                    key={k}
+                    className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 text-right min-w-[54px] border-b-2 border-gray-700"
+                    style={{
+                      position: "sticky",
+                      top: 56,
+                      zIndex: 20,
+                      backgroundColor: "var(--surface)",
+                    }}
+                  >
                     <div className="text-[8px] text-gray-500 leading-none mb-0.5">
                       {type}
                     </div>
@@ -203,32 +297,42 @@ export function WeeklyWorkTab({ labor, laborLines, estimates }: Props) {
               return (
                 <tr
                   key={rowK}
-                  className={`transition-colors hover:bg-white/[0.04] ${
-                    isNewComp && i > 0
-                      ? "border-t border-gray-600"
-                      : "border-t border-gray-800/40"
-                  }`}
+                  className="transition-colors hover:bg-white/[0.04]"
                 >
-                  <td
-                    className="px-2 py-0.5 text-gray-300 whitespace-nowrap bg-[--background]"
-                    style={{ position: "sticky", left: 0 }}
-                  >
-                    {meta.component}
-                  </td>
-                  <td className="px-2 py-0.5 text-gray-500 text-center tabular-nums">
-                    {meta.week}
-                  </td>
-                  <td className="px-2 py-0.5 text-gray-400 whitespace-nowrap">
-                    {meta.task}
-                  </td>
-                  {cols.map((k) => (
-                    <td
-                      key={k}
-                      className="px-2 py-0.5 tabular-nums text-right text-gray-300"
-                    >
-                      {rowMap[rowK][k] ? fmtH(rowMap[rowK][k]) : ""}
-                    </td>
-                  ))}
+                  {(() => {
+                    const bCls =
+                      isNewComp && i > 0
+                        ? "border-t border-gray-600"
+                        : "border-t border-gray-800/40";
+                    return (
+                      <>
+                        <td
+                          className={`px-2 py-0.5 text-gray-300 whitespace-nowrap bg-[--background] ${bCls}`}
+                          style={{ position: "sticky", left: 0 }}
+                        >
+                          {meta.component}
+                        </td>
+                        <td
+                          className={`px-2 py-0.5 text-gray-500 text-center tabular-nums ${bCls}`}
+                        >
+                          {meta.week}
+                        </td>
+                        <td
+                          className={`px-2 py-0.5 text-gray-400 whitespace-nowrap ${bCls}`}
+                        >
+                          {meta.task}
+                        </td>
+                        {cols.map((k) => (
+                          <td
+                            key={k}
+                            className={`px-2 py-0.5 tabular-nums text-right text-gray-300 ${bCls}`}
+                          >
+                            {rowMap[rowK][k] ? fmtH(rowMap[rowK][k]) : ""}
+                          </td>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </tr>
               );
             })}
