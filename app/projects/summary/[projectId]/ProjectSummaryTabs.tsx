@@ -20,7 +20,8 @@ import { ComponentsTab } from "./tabs/ComponentsTab";
 import { BudgetTab } from "./tabs/BudgetTab";
 import { EstimatesTab } from "./tabs/EstimatesTab";
 import { ProposalTab } from "./tabs/ProposalTab";
-import { UpdatesTab } from "./tabs/UpdatesTab";
+import { QBImportTab } from "./tabs/QBImportTab";
+import { QBAllocationTab } from "./tabs/QBAllocationTab";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -29,7 +30,8 @@ const TABS = [
   { id: "budget", label: "Budget" },
   { id: "estimates", label: "Estimates" },
   { id: "proposal", label: "Proposal" },
-  { id: "updates", label: "Updates" },
+  { id: "updates", label: "QB Import" },
+  { id: "qb-allocate", label: "QB Allocate" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -42,6 +44,23 @@ interface Props {
   estimates: EstimateRow[];
   deposits: DepositRow[];
   updates: UpdateRow[];
+  qbExpenses: {
+    id: number;
+    date: string | null;
+    type: string | null;
+    no: string | null;
+    memo: string | null;
+    amount: number | null;
+    status: string | null;
+    approved_by: string | null;
+    imported_at: string;
+  }[];
+  qbAllocations: {
+    id: number;
+    expense_id: number;
+    component_id: number;
+    amount: number;
+  }[];
   projectId: number;
   laborLines: ComponentLaborLine[];
   expenseLines: ComponentExpenseLine[];
@@ -57,6 +76,8 @@ export default function ProjectSummaryTabs({
   estimates,
   deposits,
   updates,
+  qbExpenses,
+  qbAllocations,
   projectId,
   laborLines,
   expenseLines,
@@ -123,7 +144,17 @@ export default function ProjectSummaryTabs({
           contingency={contingency}
         />
       )}
-      {activeTab === "updates" && <UpdatesTab updates={updates} />}
+      {activeTab === "updates" && (
+        <QBImportTab projectId={projectId} existingExpenses={qbExpenses} />
+      )}
+      {activeTab === "qb-allocate" && (
+        <QBAllocationTab
+          projectId={projectId}
+          expenses={qbExpenses}
+          components={components}
+          initialAllocations={qbAllocations}
+        />
+      )}
     </div>
   );
 }

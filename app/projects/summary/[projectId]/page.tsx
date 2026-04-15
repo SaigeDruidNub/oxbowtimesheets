@@ -3,6 +3,8 @@ import { query } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import ProjectSummaryTabs from "./ProjectSummaryTabs";
+import { getQBExpenses } from "@/app/projects/actions/import-qb-expenses";
+import { getProjectExpenseAllocations } from "@/app/projects/actions/save-expense-allocations";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -327,6 +329,8 @@ export default async function ProjectSummaryPage({
     expenseLines,
     tasks,
     classRates,
+    qbExpenses,
+    qbAllocations,
   ] = await Promise.all([
     getProject(projectId),
     getTeam(projectId),
@@ -339,6 +343,8 @@ export default async function ProjectSummaryPage({
     getComponentExpenseLines(projectId),
     getTasks(),
     getClassRates(projectId),
+    getQBExpenses(Number(projectId)),
+    getProjectExpenseAllocations(Number(projectId)),
   ]);
 
   if (!project) notFound();
@@ -388,6 +394,8 @@ export default async function ProjectSummaryPage({
         expenseLines={expenseLines}
         tasks={tasks}
         classRates={classRates}
+        qbExpenses={qbExpenses}
+        qbAllocations={qbAllocations}
       />
     </div>
   );
