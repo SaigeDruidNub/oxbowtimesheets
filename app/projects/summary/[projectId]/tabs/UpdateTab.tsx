@@ -104,6 +104,9 @@ export function UpdateTab({
       // Skip entries that lack both a task type and a classification
       // (consistent with how WeeklyWorkTab counts recorded hours)
       if (!e.task_type_name && !e.task_classification) continue;
+      // Only count billable labor (exclude Overhead and Unbillable)
+      if (e.task_type_name === "Overhead" || e.task_type_name === "Unbillable")
+        continue;
       const rate = e.task_classification
         ? (effectiveRates[e.task_classification] ?? 0)
         : 0;
@@ -269,12 +272,8 @@ export function UpdateTab({
     },
   );
 
-  // Surplus = total deposits − total projected
-  const totalDeposits = deposits.reduce(
-    (s, d) => s + (Number(d.amount) || 0),
-    0,
-  );
-  const surplus = totalDeposits - totals.totalProj;
+  // Surplus = sum of change orders − sum of variances inc. credits
+  const surplus = totals.sumChangeOrders - totals.sumVariances;
 
   // Summary metrics
   const billableHours = labor
@@ -287,10 +286,12 @@ export function UpdateTab({
   const overheadHours = labor
     .filter((e) => e.task_type_name === "Overhead")
     .reduce((s, e) => s + (Number(e.hours) || 0), 0);
-  const estHours = latEst ? Number(latEst.hours) || 0 : 0;
-
-  // Max projected for bar scaling
-  const maxProj = Math.max(...compData.map((c) => c.totalProj), 1);
+  const unbillableHours = labor
+    .filter((e) => e.task_type_name === "Unbillable")
+    .reduce((s, e) => s + (Number(e.hours) || 0), 0);
+  const estHours = laborLines
+    .filter((l) => !l.is_header)
+    .reduce((s, l) => s + (Number(l.hours) || 0), 0);
 
   // ── Styles ─────────────────────────────────────────────────────────────────
 
@@ -322,6 +323,7 @@ export function UpdateTab({
             ["Estimated Hours", estHours.toFixed(2)],
             ["Billable Hours", billableHours.toFixed(2)],
             ["Overhead Hours", overheadHours.toFixed(2)],
+            ["Unbillable Hours", unbillableHours.toFixed(2)],
           ].map(([label, val]) => (
             <div key={label} className="text-right">
               <div className="tabular-nums text-gray-200 font-medium">
@@ -358,9 +360,9 @@ export function UpdateTab({
       </div>
 
       {/* ── Main content ────────────────────────────────────────────────────── */}
-      <div className="flex gap-4 items-start">
-        {/* ── Left: component breakdown table ─────────────────────────── */}
-        <div className="flex-1 min-w-0 bg-[--surface] border border-gray-800 rounded-lg overflow-hidden">
+      <div>
+        {/* ── Component breakdown table ────────────────────────────────── */}
+        <div className="bg-[--surface] border border-gray-800 rounded-lg overflow-hidden">
           <div className="overflow-x-auto" style={{ maxHeight: "68vh" }}>
             <table className="text-xs border-collapse">
               <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
@@ -570,52 +572,6 @@ export function UpdateTab({
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* ── Right panel ──────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-4 w-72 shrink-0">
-          {/* Component delta summary */}
-          <div className="bg-[--surface] border border-gray-800 rounded-lg overflow-hidden">
-            <div className="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                Component Summary
-              </h3>
-              <span className="text-[10px] text-gray-500">Proj. vs Est.</span>
-            </div>
-            <div className="divide-y divide-gray-800/40">
-              {compData.map((c) => {
-                const estTotal = c.laborEst + c.expEst;
-                const delta = estTotal - c.totalProj;
-                const barPct = Math.min(100, (c.totalProj / maxProj) * 100);
-                const isOver = delta < -0.01;
-                return (
-                  <div key={c.id} className="px-3 py-1.5">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-xs text-gray-300 truncate max-w-[160px]">
-                        {c.name}
-                      </span>
-                      <span
-                        className={`text-[10px] tabular-nums ml-2 shrink-0 ${
-                          isOver ? "text-red-400" : "text-green-400"
-                        }`}
-                      >
-                        {isOver ? "–" : "+"}
-                        {fmtCurrency(Math.abs(delta))}
-                      </span>
-                    </div>
-                    <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          isOver ? "bg-red-500/70" : "bg-green-600/70"
-                        }`}
-                        style={{ width: `${barPct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>

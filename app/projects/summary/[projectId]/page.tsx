@@ -24,6 +24,23 @@ export interface ProjectDetails {
   client_name: string | null;
   client_phone: string | null;
   client_email: string | null;
+  client_address: string | null;
+  architect_designer_info: string | null;
+  commencement_date: string | null;
+  substantial_completion: string | null;
+  drawings_reference: string | null;
+  default_contract_type: string | null;
+  csl_holder: string | null;
+  waste_disposal: string | null;
+  role_director: string | null;
+  role_construction_pm: string | null;
+  role_junior_pm: string | null;
+  role_pm_assistant: string | null;
+  role_site_supervisor: string | null;
+  role_designer_name: string | null;
+  contract_total: number | null;
+  deposit_percent: number | null;
+  contract_signed: string | null;
   manager_first: string;
   manager_last: string;
   supervisor_first: string | null;
@@ -164,6 +181,12 @@ async function getProject(id: string): Promise<ProjectDetails | null> {
     query: `
       SELECT j.id, j.legacy_id, j.job_name, j.status, j.created,
              j.description, j.client_name, j.client_phone, j.client_email,
+             j.client_address, j.architect_designer_info, j.commencement_date,
+             j.substantial_completion, j.drawings_reference, j.default_contract_type,
+             j.csl_holder, j.waste_disposal,
+             j.role_director, j.role_construction_pm, j.role_junior_pm,
+             j.role_pm_assistant, j.role_site_supervisor, j.role_designer_name,
+             j.contract_total, j.deposit_percent, j.contract_signed,
              j.department,
              m.first_name as manager_first, m.last_name as manager_last,
              s.first_name as supervisor_first, s.last_name as supervisor_last
