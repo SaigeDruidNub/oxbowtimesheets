@@ -221,9 +221,12 @@ export function BudgetUpdateTab({
               #budget-update-doc {
                 position: fixed;
                 inset: 0;
-                padding: 28px 36px;
+                width: 8.5in;
+                min-height: 11in;
+                padding: 0.5in 0.625in;
                 background: white;
                 overflow: visible;
+                margin: 0;
               }
             }
           `,
@@ -306,8 +309,13 @@ export function BudgetUpdateTab({
       {/* ── Printable Document ── */}
       <div
         id="budget-update-doc"
-        className="bg-white text-gray-900 rounded-lg shadow-lg overflow-hidden"
-        style={{ fontFamily: "Arial, Helvetica, sans-serif", fontSize: "12px" }}
+        className="bg-white text-gray-900 shadow-2xl overflow-hidden mx-auto"
+        style={{
+          fontFamily: "Arial, Helvetica, sans-serif",
+          fontSize: "12px",
+          width: "816px",
+          minHeight: "1056px",
+        }}
       >
         {/* Document header */}
         <div className="flex justify-between items-start px-8 pt-6 pb-4 border-b-2 border-gray-800">

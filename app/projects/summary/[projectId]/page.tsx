@@ -5,6 +5,12 @@ import Link from "next/link";
 import ProjectSummaryTabs from "./ProjectSummaryTabs";
 import { getQBExpenses } from "@/app/projects/actions/import-qb-expenses";
 import { getProjectExpenseAllocations } from "@/app/projects/actions/save-expense-allocations";
+import {
+  getScheduleTasks,
+  type ScheduleTaskRow,
+} from "@/app/projects/actions/save-schedule";
+
+export type { ScheduleTaskRow };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -368,6 +374,7 @@ export default async function ProjectSummaryPage({
     qbAllocations,
     changeOrders,
     budgetUpdateSettings,
+    scheduleTasks,
   ] = await Promise.all([
     getProject(projectId),
     getTeam(projectId),
@@ -383,6 +390,7 @@ export default async function ProjectSummaryPage({
     getProjectExpenseAllocations(Number(projectId)),
     getChangeOrders(projectId),
     getBudgetUpdateSettings(projectId),
+    getScheduleTasks(Number(projectId)),
   ]);
 
   if (!project) notFound();
@@ -435,6 +443,7 @@ export default async function ProjectSummaryPage({
         qbAllocations={qbAllocations}
         changeOrders={changeOrders}
         budgetUpdateSettings={budgetUpdateSettings}
+        scheduleTasks={scheduleTasks}
       />
     </div>
   );

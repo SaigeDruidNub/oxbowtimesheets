@@ -6,6 +6,7 @@ import type {
   EstimateRow,
   DepositRow,
   ProjectClassRate,
+  ChangeOrderRow,
 } from "../page";
 import { CLASS_RATES, fmtCurrency } from "./shared";
 
@@ -35,6 +36,8 @@ interface Props {
     component_id: number;
     amount: number;
   }[];
+  changeOrders: ChangeOrderRow[];
+  contingency: number;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -48,6 +51,8 @@ export function UpdateTab({
   deposits,
   classRates,
   qbAllocations,
+  changeOrders,
+  contingency,
 }: Props) {
   // Effective rates (project overrides take precedence)
   const effectiveRates: Record<string, number> = { ...CLASS_RATES };
@@ -115,7 +120,7 @@ export function UpdateTab({
       const r =
         Number(l.rate) ||
         (l.labor_class ? (effectiveRates[l.labor_class] ?? 0) : 0);
-      laborEst += h * r;
+      laborEst += h * r * (1 + contingency / 100);
     }
 
     // Overhead + Unbillable labor
@@ -144,7 +149,7 @@ export function UpdateTab({
       const r =
         Number(l.rate) ||
         (l.labor_class ? (effectiveRates[l.labor_class] ?? 0) : 0);
-      laborRem += hLeft * r;
+      laborRem += hLeft * r * (1 + contingency / 100);
     }
     const laborProj = laborRec + laborRem;
     const laborVar = laborProj - laborEst;
@@ -154,25 +159,28 @@ export function UpdateTab({
       .filter((a) => a.component_id === comp.id)
       .reduce((s, a) => s + (Number(a.amount) || 0), 0);
 
-    // Expense estimated: cost × multiplier from expense lines
+    // Expense estimated: cost × multiplier × (1 + contingency/100), matching Estimates tab
     const compExpLines = expenseLines.filter(
       (l) => l.component_id === comp.id && !l.is_header,
     );
     const expEst = compExpLines.reduce(
-      (s, l) => s + (Number(l.cost) || 0) * (Number(l.multiplier) || 1),
+      (s, l) =>
+        s +
+        (Number(l.cost) || 0) *
+          (Number(l.multiplier) || 1) *
+          (1 + contingency / 100),
       0,
     );
 
     // Expense remaining: use amount_left if explicitly set (as entered in ComponentsTab),
-    // otherwise cost × multiplier × (1 + contingency/100) — matches ComponentsTab's logic.
+    // otherwise cost × multiplier × (1 + contingency/100) using the global contingency.
     let expRem = 0;
     for (const l of compExpLines) {
       if (l.amount_left != null) {
         expRem += Number(l.amount_left) || 0;
       } else {
         const base = (Number(l.cost) || 0) * (Number(l.multiplier) || 1);
-        const cont = (Number(l.contingency) || 0) / 100;
-        expRem += base * (1 + cont);
+        expRem += base * (1 + contingency / 100);
       }
     }
     const expProj = expRec + expRem;
@@ -181,15 +189,27 @@ export function UpdateTab({
     const estTotal = laborEst + expEst;
     const sumVariances = totalProj - estTotal;
 
+    // Change orders for this component (exclude headers/subheaders)
+    const compChangeOrders = changeOrders.filter(
+      (r) => r.component_id === comp.id && !r.is_header && !r.is_subheader,
+    );
+    const changesPending = compChangeOrders
+      .filter((r) => r.pending_approval && !r.approved)
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const approvedChanges = compChangeOrders
+      .filter((r) => r.approved)
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const sumChangeOrders = changesPending + approvedChanges;
+
     return {
       id: comp.id,
       name: comp.component_name,
       unbillableExp: 0, // no per-component unbillable expense data yet
       ohUnbillHours,
       ohUnbillLabor,
-      changesPending: 0, // no change-orders table yet
-      approvedChanges: expRec,
-      sumChangeOrders: expRec,
+      changesPending,
+      approvedChanges,
+      sumChangeOrders,
       sumVariances,
       laborRec,
       laborEst,
@@ -442,13 +462,7 @@ export function UpdateTab({
                   <td className={tdCls}>{fmtD(totals.changesPending)}</td>
                   <td className={tdCls}>{fmtD(totals.approvedChanges)}</td>
                   <td className={tdCls}>{fmtD(totals.sumChangeOrders)}</td>
-                  <td
-                    className={`${tdCls} font-medium ${
-                      totals.sumVariances < 0
-                        ? "text-red-400"
-                        : "text-green-400"
-                    }`}
-                  >
+                  <td className={`${tdCls} font-medium`}>
                     {fmtD(totals.sumVariances)}
                   </td>
                   <td
@@ -509,17 +523,7 @@ export function UpdateTab({
                     <td className={tdCls}>{fmtD(c.changesPending)}</td>
                     <td className={tdCls}>{fmtD(c.approvedChanges)}</td>
                     <td className={tdCls}>{fmtD(c.sumChangeOrders)}</td>
-                    <td
-                      className={`${tdCls} ${
-                        c.sumVariances < -0.01
-                          ? "text-red-400"
-                          : c.sumVariances > 0.01
-                            ? "text-green-400"
-                            : "text-gray-500"
-                      }`}
-                    >
-                      {fmtD(c.sumVariances)}
-                    </td>
+                    <td className={tdCls}>{fmtD(c.sumVariances)}</td>
                     <td
                       className={`${tdCls} border-l border-gray-700 !text-left text-gray-200`}
                     >

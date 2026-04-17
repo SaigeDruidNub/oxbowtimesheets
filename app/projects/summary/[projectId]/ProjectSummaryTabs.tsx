@@ -14,9 +14,10 @@ import type {
   ProjectClassRate,
   ChangeOrderRow,
   BudgetUpdateSettings,
+  ScheduleTaskRow,
 } from "./page";
 import { OverviewTab } from "./tabs/OverviewTab";
-import { LaborTab } from "./tabs/LaborTab";
+import { GanttTab } from "./tabs/GanttTab";
 import { ComponentsTab } from "./tabs/ComponentsTab";
 import { ChangeOrdersTab } from "./tabs/ChangeOrdersTab";
 import { EstimatesTab } from "./tabs/EstimatesTab";
@@ -29,16 +30,16 @@ import { BudgetUpdateTab } from "./tabs/BudgetUpdateTab";
 
 const TABS = [
   { id: "overview", label: "Overview" },
-  { id: "labor", label: "Labor" },
+  { id: "schedule", label: "Schedule" },
   { id: "components", label: "Components" },
   { id: "budget", label: "Change Orders" },
-  { id: "budget-update", label: "Budget Update" },
   { id: "estimates", label: "Estimates" },
   { id: "proposal", label: "Proposal" },
   { id: "updates", label: "QB Import" },
   { id: "qb-allocate", label: "QB Billable Expenses" },
   { id: "weekly-work", label: "Weekly Work & Components" },
   { id: "update", label: "Update" },
+  { id: "budget-update", label: "Budget Update" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -74,6 +75,7 @@ interface Props {
   classRates: ProjectClassRate[];
   changeOrders: ChangeOrderRow[];
   budgetUpdateSettings: BudgetUpdateSettings;
+  scheduleTasks: ScheduleTaskRow[];
 }
 
 export default function ProjectSummaryTabs({
@@ -92,6 +94,7 @@ export default function ProjectSummaryTabs({
   classRates,
   changeOrders,
   budgetUpdateSettings,
+  scheduleTasks,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [contingency, setContingency] = useState(10);
@@ -140,7 +143,9 @@ export default function ProjectSummaryTabs({
           initialRates={classRates}
         />
       )}
-      {activeTab === "labor" && <LaborTab labor={labor} />}
+      {activeTab === "schedule" && (
+        <GanttTab projectId={projectId} initialTasks={scheduleTasks} />
+      )}
       {activeTab === "components" && (
         <ComponentsTab
           projectId={projectId}
@@ -215,6 +220,8 @@ export default function ProjectSummaryTabs({
           deposits={deposits}
           classRates={classRates}
           qbAllocations={qbAllocations}
+          changeOrders={changeOrders}
+          contingency={contingency}
         />
       )}
     </div>

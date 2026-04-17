@@ -520,17 +520,18 @@ export function ComponentsTab({
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-gray-800 text-left text-xs text-gray-400 uppercase tracking-wider">
-                      <th className="px-2 py-2 w-12">Phase</th>
-                      <th className="px-2 py-2">Task</th>
+                      <th className="px-2 py-2 w-64">Task</th>
                       <th className="px-2 py-2 text-right w-20">Hrs</th>
                       <th className="px-2 py-2 w-36">Class</th>
-                      <th className="px-2 py-2 w-32">Billing Type</th>
                       <th className="px-2 py-2 text-right w-24">Rate</th>
                       <th className="px-2 py-2 text-right w-24">Price</th>
                       <th className="px-2 py-2 text-right w-20">Hrs Left</th>
                       <th className="px-2 py-2 text-right w-24">$ Left</th>
-                      <th className="px-2 py-2 w-32 border-l border-gray-700 bg-gray-900/30">
+                      <th className="px-2 py-2 w-56 border-l border-gray-700 bg-gray-900/30">
                         Notes
+                      </th>
+                      <th className="px-2 py-2 w-32 bg-gray-900/30">
+                        Billing Type
                       </th>
                       <th className="px-2 py-2 w-28 border-l border-gray-700 bg-gray-900/20">
                         Mat. Class
@@ -555,7 +556,7 @@ export function ComponentsTab({
                     {combinedRows.length === 0 && (
                       <tr>
                         <td
-                          colSpan={17}
+                          colSpan={16}
                           className="px-4 py-4 text-gray-500 italic text-sm"
                         >
                           No lines yet. Add a section header or row above.
@@ -585,7 +586,7 @@ export function ComponentsTab({
                             key={row._key}
                             className="bg-yellow-900/20 border-b border-gray-700"
                           >
-                            <td colSpan={16} className="px-2 py-1">
+                            <td colSpan={15} className="px-2 py-1">
                               <input
                                 value={row.task}
                                 onChange={(e) =>
@@ -616,20 +617,6 @@ export function ComponentsTab({
                           key={row._key}
                           className="hover:bg-white/[0.02] transition-colors"
                         >
-                          <td className="px-1 py-0.5">
-                            <input
-                              value={row.phase}
-                              onChange={(e) =>
-                                updateCombinedRow(
-                                  row._key,
-                                  "phase",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="—"
-                              className={cellCls + " text-center"}
-                            />
-                          </td>
                           <td className="px-1 py-0.5">
                             <input
                               list={`tasks-list-${row._key}`}
@@ -709,25 +696,6 @@ export function ComponentsTab({
                             </select>
                           </td>
                           <td className="px-1 py-0.5">
-                            <select
-                              value={row.billing_type}
-                              onChange={(e) =>
-                                updateCombinedRow(
-                                  row._key,
-                                  "billing_type",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full bg-gray-900 border border-gray-700 rounded px-1 py-0.5 text-sm text-white focus:outline-none focus:border-gray-500"
-                            >
-                              <option value="">—</option>
-                              <option value="Billable Fixed">
-                                Billable Fixed
-                              </option>
-                              <option value="Billable T&M">Billable T&M</option>
-                            </select>
-                          </td>
-                          <td className="px-1 py-0.5">
                             <input
                               type="number"
                               value={row.rate}
@@ -774,19 +742,51 @@ export function ComponentsTab({
                           >
                             {rate > 0 ? fmtCurrency(priceLeft) : "—"}
                           </td>
-                          <td className="px-1 py-0.5 border-l border-gray-700 bg-gray-900/10">
-                            <input
+                          <td className="px-1 py-0.5 border-l border-gray-700 bg-gray-900/10 align-top">
+                            <textarea
                               value={row.notes}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 updateCombinedRow(
                                   row._key,
                                   "notes",
                                   e.target.value,
+                                );
+                                e.target.style.height = "auto";
+                                e.target.style.height =
+                                  e.target.scrollHeight + "px";
+                              }}
+                              ref={(el) => {
+                                if (el) {
+                                  el.style.height = "auto";
+                                  el.style.height = el.scrollHeight + "px";
+                                }
+                              }}
+                              rows={1}
+                              placeholder="…"
+                              className={
+                                cellClsLeft +
+                                " resize-none overflow-hidden min-h-[1.75rem]"
+                              }
+                            />
+                          </td>
+                          <td className="px-1 py-0.5 bg-gray-900/10">
+                            <select
+                              value={row.billing_type}
+                              onChange={(e) =>
+                                updateCombinedRow(
+                                  row._key,
+                                  "billing_type",
+                                  e.target.value,
                                 )
                               }
-                              placeholder="…"
-                              className={cellClsLeft}
-                            />
+                              className="w-full bg-gray-900 border border-gray-700 rounded px-1 py-0.5 text-sm text-white focus:outline-none focus:border-gray-500"
+                            >
+                              <option value="">—</option>
+                              <option value="Billable Fixed">
+                                Billable Fixed
+                              </option>
+                              <option value="Billable T&M">Billable T&M</option>
+                            </select>
                           </td>
                           <td className="px-1 py-0.5 border-l border-gray-700 bg-gray-900/10">
                             <input
@@ -890,13 +890,11 @@ export function ComponentsTab({
                   {combinedRows.filter((r) => !r.is_header).length > 0 && (
                     <tfoot>
                       <tr className="border-t-2 border-gray-700 text-xs font-semibold text-gray-300">
-                        <td colSpan={2} className="px-2 py-1.5 text-gray-400">
-                          Totals
-                        </td>
+                        <td className="px-2 py-1.5 text-gray-400">Totals</td>
                         <td className="px-2 py-1.5 text-right">
                           {totalBudgetHrs.toFixed(4).replace(/\.?0+$/, "")}
                         </td>
-                        <td colSpan={2} />
+                        <td />
                         <td className="px-2 py-1.5 text-right">
                           {fmtCurrency(totalBudgetPrice)}
                         </td>
@@ -932,7 +930,7 @@ export function ComponentsTab({
                               }, 0),
                           )}
                         </td>
-                        <td colSpan={5} className="border-l border-gray-700" />
+                        <td colSpan={6} className="border-l border-gray-700" />
                         <td className="px-2 py-1.5 text-right">
                           {fmtCurrency(totalExpensePrice)}
                         </td>
@@ -1164,6 +1162,10 @@ export function ComponentsTab({
                               (s, c) => s + (byClass[c]?.hours ?? 0),
                               0,
                             );
+                            const totalDollars = usedClasses.reduce(
+                              (s, c) => s + (byClass[c]?.dollars ?? 0),
+                              0,
+                            );
                             return (
                               <tr
                                 key={`rem-${bt}`}
@@ -1174,15 +1176,25 @@ export function ComponentsTab({
                                 </td>
                                 {usedClasses.map((cls) => {
                                   const hrs = byClass[cls]?.hours ?? 0;
+                                  const dollars = byClass[cls]?.dollars ?? 0;
                                   return (
                                     <td
                                       key={cls}
                                       className="px-2 py-1 text-right border border-gray-800"
                                     >
                                       {hrs !== 0 ? (
-                                        <div className="text-white">
-                                          {hrs.toFixed(4).replace(/\.?0+$/, "")}
-                                        </div>
+                                        <>
+                                          <div className="text-white">
+                                            {hrs
+                                              .toFixed(4)
+                                              .replace(/\.?0+$/, "")}
+                                          </div>
+                                          {dollars !== 0 && (
+                                            <div className="text-gray-400">
+                                              {fmtCurrency(dollars)}
+                                            </div>
+                                          )}
+                                        </>
                                       ) : (
                                         <span className="text-gray-600">—</span>
                                       )}
@@ -1195,7 +1207,12 @@ export function ComponentsTab({
                                   </td>
                                 )}
                                 <td className="px-2 py-1 text-right font-semibold border border-gray-800 bg-yellow-900/20 text-yellow-200">
-                                  {totalHrs.toFixed(4).replace(/\.?0+$/, "")}
+                                  <div>
+                                    {totalHrs.toFixed(4).replace(/\.?0+$/, "")}
+                                  </div>
+                                  <div className="text-gray-400 font-normal">
+                                    {fmtCurrency(totalDollars)}
+                                  </div>
                                 </td>
                               </tr>
                             );
