@@ -6,7 +6,48 @@ import {
   assignTasksToEmployee,
   removeTasksFromEmployee,
   updateTaskDepartments,
+  createTask,
 } from "./actions";
+
+const LABOR_CLASSES = [
+  "Admin",
+  "Architectural Design",
+  "CNC",
+  "Construction Control",
+  "Lead Carpenter",
+  "MOE Affidavit",
+  "Overhead",
+  "Principal Oversight",
+  "Project Mgmt",
+  "Sales",
+  "Shop Design",
+  "Shop Labor",
+  "Site Labor",
+  "Site Supervisor",
+  "Stamp",
+  "Training",
+  "Travel",
+];
+
+const CLASS_RATES: Record<string, number> = {
+  Admin: 65,
+  "Architectural Design": 175,
+  CNC: 175,
+  "Construction Control": 250,
+  "Lead Carpenter": 85,
+  "MOE Affidavit": 500,
+  Overhead: 35,
+  "Principal Oversight": 250,
+  "Project Mgmt": 110,
+  Sales: 35,
+  "Shop Design": 150,
+  "Shop Labor": 85,
+  "Site Labor": 65,
+  "Site Supervisor": 95,
+  Stamp: 1000,
+  Training: 35,
+  Travel: 65,
+};
 
 export interface TaskRow {
   id: number;
@@ -62,6 +103,11 @@ export default function TaskEditorClient({
   const [pendingAdds, setPendingAdds] = useState<number[]>([]);
   const [pendingRemoves, setPendingRemoves] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskClass, setNewTaskClass] = useState(LABOR_CLASSES[0]);
+  const [addTaskSaving, setAddTaskSaving] = useState(false);
+  const [addTaskError, setAddTaskError] = useState("");
 
   const selectedEmployee = employees.find((e) => e.id === selectedEmployeeId);
 
@@ -111,15 +157,19 @@ export default function TaskEditorClient({
         (assignedTaskIds.has(t.id) || pendingAdds.includes(t.id)) &&
         !pendingRemoves.includes(t.id),
     );
-  }, [filteredTasks, assignedTaskIds, pendingAdds, pendingRemoves, selectedEmployeeId]);
+  }, [
+    filteredTasks,
+    assignedTaskIds,
+    pendingAdds,
+    pendingRemoves,
+    selectedEmployeeId,
+  ]);
 
   const unassigned = useMemo(() => {
     if (!selectedEmployeeId) return [];
     return filteredTasks.filter(
       (t) =>
-        !t.retired &&
-        !assignedTaskIds.has(t.id) &&
-        !pendingAdds.includes(t.id),
+        !t.retired && !assignedTaskIds.has(t.id) && !pendingAdds.includes(t.id),
     );
   }, [filteredTasks, assignedTaskIds, pendingAdds, selectedEmployeeId]);
 
@@ -239,9 +289,7 @@ export default function TaskEditorClient({
           if (pendingAdds.includes(t.id))
             return {
               ...t,
-              departments: [
-                ...new Set([...(t.departments ?? []), deptFilter]),
-              ],
+              departments: [...new Set([...(t.departments ?? []), deptFilter])],
             };
           if (pendingRemoves.includes(t.id))
             return {
@@ -266,9 +314,127 @@ export default function TaskEditorClient({
     );
   }
 
+  async function handleCreateTask() {
+    setAddTaskError("");
+    if (!newTaskName.trim()) {
+      setAddTaskError("Task name is required.");
+      return;
+    }
+    setAddTaskSaving(true);
+    try {
+      const result = await createTask(newTaskName, newTaskClass);
+      if (!result.success) {
+        setAddTaskError((result as any).error ?? "Failed to create task.");
+        return;
+      }
+      setLocalTasks((prev) => [
+        ...prev,
+        {
+          id: result.id!,
+          name: newTaskName.trim(),
+          classification: newTaskClass,
+          departments: [],
+          retired: false,
+          task_usage: 0,
+          y2025: 0,
+          y2026: 0,
+          workers_with: 0,
+        },
+      ]);
+      setNewTaskName("");
+      setNewTaskClass(LABOR_CLASSES[0]);
+      setShowAddTask(false);
+    } finally {
+      setAddTaskSaving(false);
+    }
+  }
+
   return (
     <div className="p-6 bg-[var(--background)] min-h-screen text-[var(--foreground)]">
-      <h1 className="text-3xl font-bold mb-6">Task Editor</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Task Editor</h1>
+        <button
+          onClick={() => {
+            setShowAddTask(true);
+            setAddTaskError("");
+          }}
+          className="bg-[var(--accent)] text-white text-sm px-4 py-2 rounded hover:opacity-90"
+        >
+          + Add Task
+        </button>
+      </div>
+
+      {/* Add Task Modal */}
+      {showAddTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[var(--surface)] rounded-lg shadow-xl border border-[var(--muted)]/20 w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold mb-4">Add New Task</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-[var(--muted)] mb-1">
+                  Task Name
+                </label>
+                <input
+                  type="text"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateTask()}
+                  placeholder="e.g. Site Visit"
+                  className="w-full border border-[var(--muted)]/30 rounded px-3 py-2 bg-[var(--background)] text-sm"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-[var(--muted)] mb-1">
+                  Default Class
+                </label>
+                <select
+                  value={newTaskClass}
+                  onChange={(e) => setNewTaskClass(e.target.value)}
+                  className="w-full border border-[var(--muted)]/30 rounded px-3 py-2 bg-[var(--background)] text-sm"
+                >
+                  {LABOR_CLASSES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="text-sm text-[var(--muted)]">
+                Rate:{" "}
+                <span className="font-semibold text-[var(--foreground)]">
+                  {CLASS_RATES[newTaskClass] !== undefined
+                    ? `$${CLASS_RATES[newTaskClass].toLocaleString()}/hr`
+                    : "—"}
+                </span>
+              </div>
+              {addTaskError && (
+                <p className="text-sm text-red-500">{addTaskError}</p>
+              )}
+            </div>
+            <div className="mt-6 flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowAddTask(false);
+                  setNewTaskName("");
+                  setAddTaskError("");
+                }}
+                disabled={addTaskSaving}
+                className="px-4 py-2 text-sm border border-[var(--muted)]/30 rounded hover:bg-[var(--background)]/20 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateTask}
+                disabled={addTaskSaving}
+                className="px-4 py-2 text-sm bg-[var(--accent)] text-white rounded hover:opacity-90 disabled:opacity-50"
+              >
+                {addTaskSaving ? "Saving…" : "Create Task"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Controls */}
       <div className="flex flex-wrap gap-4 mb-6 items-center">
@@ -329,7 +495,8 @@ export default function TaskEditorClient({
             </strong>
             {deptFilter && (
               <span>
-                {" "}· filtered to <strong>{deptFilter}</strong>
+                {" "}
+                · filtered to <strong>{deptFilter}</strong>
               </span>
             )}
           </span>
@@ -434,7 +601,8 @@ export default function TaskEditorClient({
               </h2>
             </div>
             <div className="overflow-y-auto flex-1 max-h-[50vh]">
-              {pendingAddTasks.length === 0 && pendingRemoveTasks.length === 0 ? (
+              {pendingAddTasks.length === 0 &&
+              pendingRemoveTasks.length === 0 ? (
                 <p className="px-4 py-4 text-xs text-[var(--muted)]">
                   No pending changes.
                 </p>
@@ -597,7 +765,8 @@ export default function TaskEditorClient({
               </h2>
             </div>
             <div className="overflow-y-auto flex-1 max-h-[50vh]">
-              {pendingAddTasks.length === 0 && pendingRemoveTasks.length === 0 ? (
+              {pendingAddTasks.length === 0 &&
+              pendingRemoveTasks.length === 0 ? (
                 <p className="px-4 py-4 text-xs text-[var(--muted)]">
                   No pending changes.
                 </p>
@@ -709,7 +878,7 @@ export default function TaskEditorClient({
                         handleToggleRetired(task.id, e.target.checked)
                       }
                       title="Mark as retired"
-                      className="cursor-pointer"
+                      className="cursor-pointer accent-[var(--accent)]"
                     />
                   </td>
                   <td className="px-3 py-2 text-[var(--muted)]">{task.id}</td>

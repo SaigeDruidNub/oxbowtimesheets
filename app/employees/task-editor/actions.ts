@@ -49,3 +49,16 @@ export async function updateTaskDepartments(
   revalidatePath("/employees/task-editor");
   return { success: true };
 }
+
+export async function createTask(name: string, classification: string) {
+  const trimmed = name.trim();
+  if (!trimmed) return { success: false, error: "Task name is required." };
+
+  const result = (await query({
+    query: `INSERT INTO tasks (name, classification, departments, retired) VALUES (?, ?, ?, 0)`,
+    values: [trimmed, classification, JSON.stringify([])],
+  })) as any;
+
+  revalidatePath("/employees/task-editor");
+  return { success: true, id: result.insertId as number };
+}
