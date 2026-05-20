@@ -25,12 +25,15 @@ export default function UnapprovedTimesheetsClient({
     useState<TimesheetEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Group timesheets by employee
+  // Group timesheets by employee_id to handle duplicate first/last names
   const groupedTimesheets = initialTimesheets.reduce((acc: any, ts: any) => {
-    const key = `${ts.first_name} ${ts.last_name || ""}`.trim();
+    const key =
+      ts.employee_id ?? `${ts.first_name} ${ts.last_name || ""}`.trim();
     if (!acc[key]) {
       acc[key] = {
-        name: key,
+        employeeId: ts.employee_id,
+        firstName: ts.first_name,
+        name: `${ts.first_name} ${ts.last_name || ""}`.trim(),
         timesheets: [],
         totalHours: 0,
       };
@@ -41,6 +44,8 @@ export default function UnapprovedTimesheetsClient({
   }, {});
 
   const groups = Object.values(groupedTimesheets) as {
+    employeeId: number | null;
+    firstName: string;
     name: string;
     timesheets: any[];
     totalHours: number;
@@ -114,7 +119,7 @@ export default function UnapprovedTimesheetsClient({
         <p style={{ color: "var(--muted)" }}>No unapproved timesheets found.</p>
       ) : (
         groups.map((group) => (
-          <div key={group.name} className="space-y-4">
+          <div key={group.employeeId ?? group.name} className="space-y-4">
             <div className="flex flex-col space-y-2">
               <h2
                 className="text-2xl font-bold"
@@ -134,7 +139,7 @@ export default function UnapprovedTimesheetsClient({
                   className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 transition-colors"
                   style={{ backgroundColor: "var(--color-paynes-gray)" }}
                 >
-                  Approve All for {group.name.split(" ")[0]}
+                  Approve All for {group.firstName}
                 </button>
                 <button
                   onClick={() => {

@@ -10,7 +10,7 @@ export const authConfig = {
   ],
   pages: {
     signIn: "/login",
-    error: "/login?error=AccessDenied", // Error code passed in query string
+    error: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
